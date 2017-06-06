@@ -24,3 +24,5 @@ hs_err_pid*
 atlassian-ide-plugin.xml
 component/component.iml
 component/target/
+component/siddhi-store-solr.iml
+siddhi-store-solr-parent.iml

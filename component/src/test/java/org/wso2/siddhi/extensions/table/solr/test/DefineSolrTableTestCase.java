@@ -45,7 +45,7 @@ public class DefineSolrTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', url='localhost:9983', collection='TEST1', base.config='gettingstarted', " +
-                "shards='2', replicas='2', schema='time long stored, date string stored', commit.async='true') " +
+                " schema='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
         siddhiManager.createExecutionPlanRuntime(defineQuery);

@@ -30,4 +30,6 @@ public class SolrTableConstants {
     public static final String ANNOTATION_ELEMENT_SCHEMA = "schema";
     public static final String ANNOTATION_ELEMENT_CONFIGSET = "base.config";
     public static final String ANNOTATION_ELEMENT_COMMIT_ASYNC = "commit.async";
+    public static final String ANNOTATION_ELEMENT_MERGE_SCHEMA = "merge.schema";
+
 }

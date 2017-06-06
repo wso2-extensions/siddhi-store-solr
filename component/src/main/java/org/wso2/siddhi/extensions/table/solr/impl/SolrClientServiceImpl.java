@@ -63,16 +63,21 @@ public class SolrClientServiceImpl implements SolrClientService {
     private static final String SOLR_CONFIG_FILE = "solr-cloud-config.xml";
     private static Log log = LogFactory.getLog(SolrClientServiceImpl.class);
     private volatile SiddhiSolrClient indexerClient = null;
+    private HashMap<String, SiddhiSolrClient> indexerClients = new HashMap<>();
     private CollectionConfiguration glabalCollectionConfig;
-    private final Object indexClientsLock = new Object();
     private Map<String, SolrSchema> solrSchemaCache = new ConcurrentHashMap<>();
+    private static SolrClientService solrClientService = new SolrClientServiceImpl();
 
-    public SolrClientServiceImpl() {
+    private SolrClientServiceImpl() {
         try {
             glabalCollectionConfig = loadGlobalCollectionConfigurations();
         } catch (CannotLoadConfigurationException e) {
             log.error("Failed to initialize Solr cloud service : " + e.getMessage(), e);
         }
+    }
+
+    public static SolrClientService  getInstance() {
+        return solrClientService;
     }
 
     private CollectionConfiguration loadGlobalCollectionConfigurations() throws CannotLoadConfigurationException {
@@ -95,7 +100,7 @@ public class SolrClientServiceImpl implements SolrClientService {
     @Override
     public SiddhiSolrClient getSolrServiceClient() throws SolrClientServiceException {
         if (indexerClient == null) {
-            synchronized (indexClientsLock) {
+            synchronized (this) {
                 if (indexerClient == null) {
                     if (glabalCollectionConfig != null) {
                         SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
@@ -105,6 +110,23 @@ public class SolrClientServiceImpl implements SolrClientService {
             }
         }
         return indexerClient;
+    }
+
+
+    public SiddhiSolrClient getSolrServiceClient(String url) throws SolrClientServiceException {
+        SiddhiSolrClient siddhiSolrClient = indexerClients.get(url);
+        if (siddhiSolrClient == null) {
+            synchronized (this) {
+                if (siddhiSolrClient == null) {
+                    if (glabalCollectionConfig != null) {
+                        SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
+                        siddhiSolrClient = new SiddhiSolrClient(client);
+                        indexerClients.put(url, siddhiSolrClient);
+                    }
+                }
+            }
+        }
+        return siddhiSolrClient;
     }
 
     @Override

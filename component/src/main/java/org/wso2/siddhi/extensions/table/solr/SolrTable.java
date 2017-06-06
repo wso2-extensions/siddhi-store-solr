@@ -48,6 +48,7 @@ import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,29 +59,35 @@ import java.util.Map;
 @Extension(
         name = "solr",
         namespace = "store",
-        description = "Using this extension the solr connection instructions can be assigned to the event table",
+        description = "Solr store implementation uses solr collections for underlying data storage. The events are " +
+                      "converted to Solr documents when the events are inserted to solr store. Solr documents are " +
+                      "converted to Events when the Solr documents are read from solr collections. This can only be " +
+                      "used with the Solr cloud mode.",
         parameters = {
                 @Parameter(name = "collection",
                         description = "The name of the solr collection.",
-                        type = {DataType.STRING}),
+                        type = {DataType.STRING}, optional = true),
                 @Parameter(name = "url",
                         description = "The zookeeper url of the solr cloud",
-                        type = {DataType.STRING}),
+                        type = {DataType.STRING}, optional = true),
                 @Parameter(name = "shards",
                         description = "The number of shards of the solr collection",
-                        type = {DataType.INT}),
+                        type = {DataType.INT}, optional = true),
                 @Parameter(name = "replicas",
                         description = "The number of replicas of the solr collection.",
-                        type = {DataType.INT}),
+                        type = {DataType.INT}, optional = true),
                 @Parameter(name = "schema",
                         description = "The explicit solr collection schema definition.",
-                        type = {DataType.STRING}),
+                        type = {DataType.STRING}, optional = true),
                 @Parameter(name = "commit.async",
                         description = "The explicit solr collection schema definition.",
-                        type = {DataType.BOOL}),
+                        type = {DataType.BOOL}, optional = true),
                 @Parameter(name = "base.config",
                         description = "The basic configset used to create the collection specific configurations.",
-                        type = {DataType.STRING})
+                        type = {DataType.STRING}, optional = true),
+                @Parameter(name = "merge.schema",
+                        description = "The basic configset used to create the collection specific configurations.",
+                        type = {DataType.BOOL}, optional = true)
         },
         examples = {
                 @Example(
@@ -96,13 +103,14 @@ import java.util.Map;
 
 public class SolrTable extends AbstractRecordTable {
 
-    private static final String ATOMIC_SET_MODIFIER = "set";
+    private static final String SET_MODIFIER = "set";
     private static final int ITERATOR_BATCH_SIZE = 1000;
     private SolrClientService solrClientService;
     private List<Attribute> attributes;
     private String collection;
     private List<String> primaryKeys;
     private boolean commitAsync;
+    private boolean mergeSchema;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
@@ -118,7 +126,6 @@ public class SolrTable extends AbstractRecordTable {
                 primaryKeys.add(element.getValue().trim());
             });
         }
-
         if (storeAnnotation != null) {
             collection = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COLLECTION);
             String url = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_URL);
@@ -127,10 +134,11 @@ public class SolrTable extends AbstractRecordTable {
             String schema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SCHEMA);
             String configSet = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_CONFIGSET);
             String commitAsync = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COMMIT_ASYNC);
+            String mergeSchema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_MERGE_SCHEMA);
 
 
             if (collection == null || collection.trim().isEmpty()) {
-                throw new ExecutionPlanCreationException("Solr collection name cannot be null or empty");
+                collection = tableDefinition.getId();
             }
             if (url == null || url.trim().isEmpty()) {
                 throw new ExecutionPlanCreationException("SolrCloud url cannot be null or empty");
@@ -144,11 +152,16 @@ public class SolrTable extends AbstractRecordTable {
             } else {
                 this.commitAsync = Boolean.parseBoolean(commitAsync);
             }
+            if (mergeSchema != null && !mergeSchema.isEmpty()) {
+                this.mergeSchema = Boolean.parseBoolean(mergeSchema);
+            } else {
+                this.mergeSchema = false;
+            }
             SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
             CollectionConfiguration collectionConfig = new CollectionConfiguration.Builder().collectionName
                     (collection).solrServerUrl(url).shards(shards).replicas(replicas).configs(configSet).schema
                     (solrSchema).build();
-            solrClientService = new SolrClientServiceImpl();
+            solrClientService = SolrClientServiceImpl.getInstance();
             try {
                 solrClientService.createCollection(collectionConfig);
                 solrClientService.updateSolrSchema(collection, solrSchema, true);
@@ -222,35 +235,65 @@ public class SolrTable extends AbstractRecordTable {
             throws SolrClientServiceException, SolrServerException, IOException {
         List<SolrIndexDocument> updateDocs = new ArrayList<>();
         List<SolrIndexDocument> addDocs = new ArrayList<>();
-        int index = 0;
-        for (Map<String, Object> updateConditionParameterMap : updateConditionParameterMaps) {
+        List<String> deleteDocIds = new ArrayList<>();
+
+        for (int index = 0; index < updateConditionParameterMaps.size(); index++) {
+            Map<String, Object> updateConditionParameterMap = updateConditionParameterMaps.get(index);
             SolrRecordIterator solrRecordIterator = findRecords(updateConditionParameterMap, compiledCondition);
-            Map<String, Object> updateFields = updateValues.get(index);
             if (solrRecordIterator.hasNext()) {
-                while (solrRecordIterator.hasNext()) {
-                    SolrIndexDocument inputDocument = new SolrIndexDocument();
-                    SolrDocument document = solrRecordIterator.nextDocument();
-                    inputDocument.addField(SolrSchemaField.FIELD_ID, document.getFieldValue(SolrSchemaField.FIELD_ID));
-                    for (Map.Entry<String, Object> entry : updateFields.entrySet()) {
-                        Map<String, Object> update = new HashMap<>();
-                        update.put(ATOMIC_SET_MODIFIER, entry.getValue());
-                        inputDocument.addField(entry.getKey(), update);
-                    }
-                    updateDocs.add(inputDocument);
-                }
+                Map<String, Object> updateFields = updateValues.get(index);
+                updateDocs = getUpdateDocuments(solrRecordIterator, updateFields);
             } else {
-                if (addingRecords != null && !addingRecords.isEmpty()) {
-                    SolrIndexDocument newDoc = SolrTableUtils.createSolrDocument(attributes, primaryKeys,
-                                                                                 addingRecords.get(index));
-                    addDocs.add(newDoc);
+                addDocs = getNewSolrDocuments(addingRecords, index);
+            }
+        }
+        if (primaryKeys != null && !primaryKeys.isEmpty()) {
+            if (updateValues != null && !updateValues.isEmpty()) {
+                Collection<String> updateFields = updateValues.get(0).keySet();
+                updateFields.retainAll(primaryKeys);
+                if (!updateFields.isEmpty()) {
+                    for (SolrIndexDocument doc : updateDocs) {
+                        deleteDocIds.add(doc.getFieldValue(SolrSchemaField.FIELD_ID).toString());
+                        doc.setField(SolrSchemaField.FIELD_ID, SolrTableUtils.generateRecordIdFromPrimaryKeyValues
+                                (doc, primaryKeys));
+                    }
                 }
             }
-            index++;
         }
         if (!addDocs.isEmpty()) {
             updateDocs.addAll(addDocs);
         }
+        if (!deleteDocIds.isEmpty()) {
+            solrClientService.deleteDocuments(collection, deleteDocIds, commitAsync);
+        }
         solrClientService.insertDocuments(collection, updateDocs, commitAsync);
+    }
+
+    private List<SolrIndexDocument>  getNewSolrDocuments(List<Object[]> addingRecords, int index) {
+        List<SolrIndexDocument> addDocs = new ArrayList<>();
+        if (addingRecords != null && !addingRecords.isEmpty()) {
+            SolrIndexDocument newDoc = SolrTableUtils.createSolrDocument(attributes, primaryKeys,
+                                                                         addingRecords.get(index));
+            addDocs.add(newDoc);
+        }
+        return addDocs;
+    }
+
+    private List<SolrIndexDocument> getUpdateDocuments(SolrRecordIterator solrRecordIterator,
+                                    Map<String, Object> updateFields) {
+        List<SolrIndexDocument> updateDocs = new ArrayList<>();
+        while (solrRecordIterator.hasNext()) {
+            SolrIndexDocument inputDocument = new SolrIndexDocument();
+            SolrDocument document = solrRecordIterator.nextDocument();
+            for (Map.Entry<String, Object> entry : updateFields.entrySet()) {
+                Map<String, Object> update = new HashMap<>();
+                update.put(SET_MODIFIER, entry.getValue());
+                inputDocument.addField(entry.getKey(), update);
+            }
+            inputDocument.setField(SolrSchemaField.FIELD_ID, document.getFieldValue(SolrSchemaField.FIELD_ID));
+            updateDocs.add(inputDocument);
+        }
+        return updateDocs;
     }
 
     @Override

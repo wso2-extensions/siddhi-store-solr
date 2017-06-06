@@ -34,14 +34,12 @@ public class SolrSchemaField implements Serializable {
      * Common attributes used to describe each field
      */
     public static final String ATTR_FIELD_NAME = "name";
-    public static final String ATTR_INDEXED = "indexed";
     public static final String ATTR_STORED = "stored"; //Can be removed because of docValues
     public static final String ATTR_TYPE = "type";
 
     /**
      * Fields used internally
      */
-    public static final String FIELD_TIMESTAMP = "_timestamp";
     public static final String FIELD_ID = "id";
     public static final String FIELD_VERSION = "_version_";
 

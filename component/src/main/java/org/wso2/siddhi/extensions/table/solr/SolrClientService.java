@@ -39,6 +39,13 @@ public interface SolrClientService {
     public SiddhiSolrClient getSolrServiceClient() throws SolrClientServiceException;
 
     /**
+     * Returns the indexingClient for the specific tenant's table. Can be used to add, delete, update query/perform searches the tables' index
+     * @return {@link org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient} A wrapper for {@link org.apache.solr.client.solrj.SolrClient}
+     * @throws org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException Exception thrown if something goes wrong while creating or retrieving the client.
+     */
+    public SiddhiSolrClient getSolrServiceClient(String url) throws SolrClientServiceException;
+
+    /**
      * Create the Index/core/collection for the given table
      * @param configuration The collection configurations for which the index is created.
      * @return Returns true if successful, otherwise false

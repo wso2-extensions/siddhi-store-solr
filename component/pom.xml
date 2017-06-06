@@ -75,10 +75,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-
                         </Private-Package>
                         <Export-Package>
-
                         </Export-Package>
                         <Import-Package>
                             org.wso2.siddhi.*;version="${siddhi.version}",
@@ -97,7 +95,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/*TestCase.java</include>
+                        <include>**/DefineSolrTableTestCase.java</include>
                     </includes>
                     <argLine>-ea -Xmx512m</argLine>
                 </configuration>
