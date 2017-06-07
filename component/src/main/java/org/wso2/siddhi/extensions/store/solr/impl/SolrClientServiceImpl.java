@@ -30,7 +30,7 @@ import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.apache.solr.client.solrj.response.ConfigSetAdminResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.SolrException;
-import org.wso2.siddhi.extensions.store.solr.beans.SolrIndexDocument;
+import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
 import org.wso2.siddhi.extensions.store.solr.config.CollectionConfiguration;
@@ -54,7 +54,6 @@ public class SolrClientServiceImpl {
 
     private static final String ATTR_ERRORS = "errors";
     private static final String ATTR_COLLECTIONS = "collections";
-    private static final String SOLR_CONFIG_FILE = "solr-cloud-config.xml";
     private static Log log = LogFactory.getLog(SolrClientServiceImpl.class);
     private volatile SiddhiSolrClient indexerClient = null;
     private CollectionConfiguration glabalCollectionConfig;
@@ -361,7 +360,7 @@ public class SolrClientServiceImpl {
         }
     }
 
-    public void insertDocuments(String table, List<SolrIndexDocument> docs, boolean commitAsync)
+    public void insertDocuments(String table, List<SiddhiSolrDocument> docs, boolean commitAsync)
             throws SolrClientServiceException {
         try {
             SiddhiSolrClient client = getSolrServiceClient();

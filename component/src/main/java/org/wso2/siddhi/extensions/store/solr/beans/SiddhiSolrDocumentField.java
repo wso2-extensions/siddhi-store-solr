@@ -18,24 +18,16 @@
 
 package org.wso2.siddhi.extensions.store.solr.beans;
 
-import org.apache.solr.common.SolrInputDocument;
-import org.wso2.siddhi.extensions.store.solr.utils.SolrTableUtils;
-
-import java.util.Map;
+import org.apache.solr.common.SolrInputField;
 
 /**
- * This represents a Solr document which is created from a DAL record.
+ * This represents the IndexField which is input to solr index
  */
-public class SolrIndexDocument extends SolrInputDocument {
+public class SiddhiSolrDocumentField extends SolrInputField {
 
+    private static final long serialVersionUID = 7166526003567985768L;
 
-    private static final long serialVersionUID = -2176046055014616443L;
-
-    public SolrIndexDocument(String... fields) {
-        super(fields);
-    }
-
-    public SolrIndexDocument(Map<String, SolrIndexDocumentField> fields) {
-        super(SolrTableUtils.getSolrFields(fields));
+    public SiddhiSolrDocumentField(String n) {
+        super(n);
     }
 }

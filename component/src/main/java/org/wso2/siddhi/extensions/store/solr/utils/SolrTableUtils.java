@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.wso2.siddhi.extensions.store.solr.SolrCompiledCondition;
-import org.wso2.siddhi.extensions.store.solr.beans.SolrIndexDocument;
-import org.wso2.siddhi.extensions.store.solr.beans.SolrIndexDocumentField;
+import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
+import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocumentField;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
 import org.wso2.siddhi.extensions.store.solr.exceptions.SolrClientServiceException;
@@ -136,13 +136,13 @@ public class SolrTableUtils {
         return mergedSchema;
     }
 
-    public static Map<String, SolrInputField> getSolrFields(Map<String, SolrIndexDocumentField> fields) {
+    public static Map<String, SolrInputField> getSolrFields(Map<String, SiddhiSolrDocumentField> fields) {
         Map<String, SolrInputField> solrFields = new LinkedHashMap<>(fields.size());
         solrFields.putAll(fields);
         return solrFields;
     }
 
-    public static List<SolrInputDocument> getSolrInputDocuments(List<SolrIndexDocument> docs) {
+    public static List<SolrInputDocument> getSolrInputDocuments(List<SiddhiSolrDocument> docs) {
         List<SolrInputDocument> solrDocs = new ArrayList<>(docs.size());
         solrDocs.addAll(docs);
         return solrDocs;
@@ -179,34 +179,34 @@ public class SolrTableUtils {
         return new SolrSchema(SolrSchemaField.FIELD_ID, schemaFields);
     }
 
-    public static List<SolrIndexDocument> createSolrDocuments(List<Attribute> attributes, List<String> primaryKeys,
+    public static List<SiddhiSolrDocument> createSolrDocuments(List<Attribute> attributes, List<String> primaryKeys,
                                                               List<Object[]> records) {
-        List<SolrIndexDocument> solrIndexDocuments = new ArrayList<>();
+        List<SiddhiSolrDocument> siddhiSolrDocuments = new ArrayList<>();
         for (Object[] record : records) {
-            SolrIndexDocument solrIndexDocument = createSolrDocument(attributes, primaryKeys, record);
-            solrIndexDocuments.add(solrIndexDocument);
+            SiddhiSolrDocument siddhiSolrDocument = createSolrDocument(attributes, primaryKeys, record);
+            siddhiSolrDocuments.add(siddhiSolrDocument);
         }
-        return solrIndexDocuments;
+        return siddhiSolrDocuments;
     }
 
-    public static SolrIndexDocument createSolrDocument(List<Attribute> attributes, List<String> primaryKeys,
+    public static SiddhiSolrDocument createSolrDocument(List<Attribute> attributes, List<String> primaryKeys,
                                                        Object[] record) {
         int fieldIndex = 0;
-        SolrIndexDocument solrIndexDocument = new SolrIndexDocument();
+        SiddhiSolrDocument siddhiSolrDocument = new SiddhiSolrDocument();
         for (Attribute attribute : attributes) {
-            solrIndexDocument.setField(attribute.getName(), record[fieldIndex]);
+            siddhiSolrDocument.setField(attribute.getName(), record[fieldIndex]);
             fieldIndex++;
         }
-        if (!solrIndexDocument.containsKey(SolrSchemaField.FIELD_ID)) {
+        if (!siddhiSolrDocument.containsKey(SolrSchemaField.FIELD_ID)) {
             String id;
             if (primaryKeys != null && !primaryKeys.isEmpty()) {
-                id = generateRecordIdFromPrimaryKeyValues(solrIndexDocument, primaryKeys);
+                id = generateRecordIdFromPrimaryKeyValues(siddhiSolrDocument, primaryKeys);
             } else {
                 id = generateRecordID();
             }
-            solrIndexDocument.addField(SolrSchemaField.FIELD_ID, id);
+            siddhiSolrDocument.addField(SolrSchemaField.FIELD_ID, id);
         }
-        return solrIndexDocument;
+        return siddhiSolrDocument;
     }
 
     public static String resolveCondition(SolrCompiledCondition compiledCondition, Map<String, Object> parameters,
@@ -231,7 +231,7 @@ public class SolrTableUtils {
         return condition;
     }
 
-    public static String generateRecordIdFromPrimaryKeyValues(SolrIndexDocument document, List<String> primaryKeys) {
+    public static String generateRecordIdFromPrimaryKeyValues(SiddhiSolrDocument document, List<String> primaryKeys) {
         StringBuilder builder = new StringBuilder();
         Object obj;
         for (String key : primaryKeys) {

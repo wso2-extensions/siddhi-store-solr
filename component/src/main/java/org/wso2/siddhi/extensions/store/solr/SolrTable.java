@@ -33,7 +33,7 @@ import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.extensions.store.solr.beans.SolrIndexDocument;
+import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
 import org.wso2.siddhi.extensions.store.solr.config.CollectionConfiguration;
@@ -190,10 +190,10 @@ public class SolrTable extends AbstractRecordTable {
 
     @Override
     protected void add(List<Object[]> records) {
-        List<SolrIndexDocument> solrIndexDocuments = SolrTableUtils.createSolrDocuments(attributes, primaryKeys,
+        List<SiddhiSolrDocument> siddhiSolrDocuments = SolrTableUtils.createSolrDocuments(attributes, primaryKeys,
                                                                                         records);
         try {
-            solrClientService.insertDocuments(collection, solrIndexDocuments, commitAsync);
+            solrClientService.insertDocuments(collection, siddhiSolrDocuments, commitAsync);
         } catch (SolrClientServiceException e) {
             throw new SolrTableException("Error while inserting records to Solr Event Table: " + e.getMessage(), e);
         }
@@ -249,8 +249,8 @@ public class SolrTable extends AbstractRecordTable {
                                      CompiledCondition compiledCondition, List<Map<String, Object>> updateValues,
                                      List<Object[]> addingRecords)
             throws SolrClientServiceException, SolrServerException, IOException {
-        List<SolrIndexDocument> updateDocs = new ArrayList<>();
-        List<SolrIndexDocument> addDocs = new ArrayList<>();
+        List<SiddhiSolrDocument> updateDocs = new ArrayList<>();
+        List<SiddhiSolrDocument> addDocs = new ArrayList<>();
         List<String> deleteDocIds = new ArrayList<>();
 
         for (int index = 0; index < updateConditionParameterMaps.size(); index++) {
@@ -268,7 +268,7 @@ public class SolrTable extends AbstractRecordTable {
                 Collection<String> updateFields = updateValues.get(0).keySet();
                 updateFields.retainAll(primaryKeys);
                 if (!updateFields.isEmpty()) {
-                    for (SolrIndexDocument doc : updateDocs) {
+                    for (SiddhiSolrDocument doc : updateDocs) {
                         deleteDocIds.add(doc.getFieldValue(SolrSchemaField.FIELD_ID).toString());
                         doc.setField(SolrSchemaField.FIELD_ID, SolrTableUtils.generateRecordIdFromPrimaryKeyValues
                                 (doc, primaryKeys));
@@ -285,21 +285,21 @@ public class SolrTable extends AbstractRecordTable {
         solrClientService.insertDocuments(collection, updateDocs, commitAsync);
     }
 
-    private List<SolrIndexDocument> getNewSolrDocuments(List<Object[]> addingRecords, int index) {
-        List<SolrIndexDocument> addDocs = new ArrayList<>();
+    private List<SiddhiSolrDocument> getNewSolrDocuments(List<Object[]> addingRecords, int index) {
+        List<SiddhiSolrDocument> addDocs = new ArrayList<>();
         if (addingRecords != null && !addingRecords.isEmpty()) {
-            SolrIndexDocument newDoc = SolrTableUtils.createSolrDocument(attributes, primaryKeys,
+            SiddhiSolrDocument newDoc = SolrTableUtils.createSolrDocument(attributes, primaryKeys,
                                                                          addingRecords.get(index));
             addDocs.add(newDoc);
         }
         return addDocs;
     }
 
-    private List<SolrIndexDocument> getUpdateDocuments(SolrRecordIterator solrRecordIterator,
+    private List<SiddhiSolrDocument> getUpdateDocuments(SolrRecordIterator solrRecordIterator,
                                                        Map<String, Object> updateFields) {
-        List<SolrIndexDocument> updateDocs = new ArrayList<>();
+        List<SiddhiSolrDocument> updateDocs = new ArrayList<>();
         while (solrRecordIterator.hasNext()) {
-            SolrIndexDocument inputDocument = new SolrIndexDocument();
+            SiddhiSolrDocument inputDocument = new SiddhiSolrDocument();
             SolrDocument document = solrRecordIterator.nextDocument();
             for (Map.Entry<String, Object> entry : updateFields.entrySet()) {
                 Map<String, Object> update = new HashMap<>();

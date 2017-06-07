@@ -28,7 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.wso2.siddhi.extensions.store.solr.beans.SolrIndexDocument;
+import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
 import org.wso2.siddhi.extensions.store.solr.config.CollectionConfiguration;
@@ -204,7 +204,7 @@ public class CarbonIndexerServiceTestCase {
 
     @Test
     public void step8_testIndexDocuments() throws SolrClientServiceException, IOException, SolrServerException {
-        SolrIndexDocument doc1 = new SolrIndexDocument();
+        SiddhiSolrDocument doc1 = new SiddhiSolrDocument();
         doc1.addField("id", "1");
         doc1.addField("_timestamp", System.currentTimeMillis());
         doc1.addField("IntField", 100);
@@ -212,7 +212,7 @@ public class CarbonIndexerServiceTestCase {
         doc1.addField("FloatField", 100f);
         doc1.addField("DoubleField", 100d);
         doc1.addField("BoolField", true);
-        SolrIndexDocument doc2 = new SolrIndexDocument();
+        SiddhiSolrDocument doc2 = new SiddhiSolrDocument();
         doc2.addField("id", "2");
         doc2.addField("IntField1", 1000);
         doc2.addField("LongField1", 1000L);
@@ -220,7 +220,7 @@ public class CarbonIndexerServiceTestCase {
         doc2.addField("DoubleField1", 1000d);
         doc2.addField("BoolField1", true);
         doc2.addField("StringField1", "The quick brown fox jumps over the lazy dog");
-        List<SolrIndexDocument> docs = new ArrayList<>();
+        List<SiddhiSolrDocument> docs = new ArrayList<>();
         docs.add(doc1);
         docs.add(doc2);
         indexerService.insertDocuments(TABLE_T1, docs, false);
