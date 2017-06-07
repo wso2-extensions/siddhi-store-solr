@@ -62,12 +62,13 @@ public class InsertToSolrTableTestCase {
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "@PrimaryKey('firstname','lastname')" +
                 "@store(type='solr', url='localhost:9983', collection='TEST3', base.config='gettingstarted', " +
-                "shards='2', replicas='2', schema='firstname string stored, lastname string stored, age int stored', " +
+                "shards='2', replicas='2', schema='recordId string stored, lastname string stored, age int stored', " +
                 "commit.async='true')" +
-                "define table FooTable(firstname string, lastname string, age int);";
+                "define table FooTable(recordId string, lastname string, age int);";
         String insertQuery = "" +
                              "@info(name = 'query1') " +
                              "from FooStream   " +
+                             "select firstname as recordId, lastname, age " +
                              "insert into FooTable ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery + insertQuery);
