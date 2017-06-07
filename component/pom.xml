@@ -86,11 +86,7 @@
                             org.wso2.siddhi.extensions.store.solr.*
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.siddhi.*;version="${siddhi.version}",
-                            org.apache.solr.*;version="${solr.imp.pkg.version.range}
-                            org.apache.log4j;version="${log4j.imp.pkg.version.range}",
-                            javax.xml.bind,
-                            javax.xml.bind.annotation
+                            *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
@@ -103,7 +99,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/InsertToSolrTableTestCase.java</include>
+                        <include>**/*TestCase.java</include>
                     </includes>
                     <argLine>-ea -Xmx512m</argLine>
                 </configuration>
