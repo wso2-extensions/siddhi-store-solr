@@ -67,7 +67,7 @@ public class DefineSolrTableTestCase {
         try {
             indexerService.deleteCollection("TEST1");
         } finally {
-            if (indexerService != null ) {
+            if (indexerService != null) {
                 indexerService.destroy();
             }
         }

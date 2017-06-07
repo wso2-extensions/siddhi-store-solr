@@ -78,7 +78,7 @@ public class SolrSchemaField implements Serializable {
     }
 
     public void setProperty(String name, Object value) {
-        if(name != null && !name.trim().isEmpty()) {
+        if (name != null && !name.trim().isEmpty()) {
             this.properties.put(name, value);
         }
     }

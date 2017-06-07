@@ -95,7 +95,8 @@ import java.util.Map;
                 @Example(
                         syntax = "@store(type='solr', zookeeper.url='localhost:9983', collection='TEST1', base" +
                                  ".config='gettingstarted', " +
-                                 "shards='2', replicas='2', schema='time long stored, date string stored', commit.async='true') " +
+                                 "shards='2', replicas='2', schema='time long stored, date string stored', " +
+                                 "commit.async='true')" +
                                  "define table Footable(time long, date string);",
                 description = "Above example will create a solr collection which has two shards with two replicas " +
                               "which is named TEST1, using the basic config 'gettingstarted'. it will have two fields" +
@@ -167,8 +168,8 @@ public class SolrTable extends AbstractRecordTable {
             } else {
                 this.mergeSchema = false;
             }
-            this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants.PROPERTY_READ_BATCH_SIZE,
-                                                                          SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
+            this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants
+                    .PROPERTY_READ_BATCH_SIZE, SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
             SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
             CollectionConfiguration collectionConfig = new CollectionConfiguration.Builder().collectionName
                     (this.collection).solrServerUrl(url).shards(Integer.parseInt(shards)).replicas(Integer.parseInt

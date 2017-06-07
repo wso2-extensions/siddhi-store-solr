@@ -73,7 +73,8 @@ public class SolrClientServiceImpl {
         if (indexerClient == null) {
             synchronized (this) {
                 if (indexerClient == null) {
-                    SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
+                    SolrClient client = new CloudSolrClient.Builder()
+                            .withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
                     indexerClient = new SiddhiSolrClient(client);
                 }
             }
@@ -98,7 +99,8 @@ public class SolrClientServiceImpl {
                     } else {
                         throw new SolrClientServiceException("Error in deploying initial solr configset for " +
                                                              "table: " + tableNameWithTenant + ", " +
-                                ", Response code: " + configSetResponse.getStatus() + " , errors: " + errors.toString());
+                                ", Response code: " + configSetResponse.getStatus() +
+                                                             " , errors: " + errors.toString());
                     }
                 } else {
                     return createSolrCollection(tableNameWithTenant, config);
@@ -106,7 +108,8 @@ public class SolrClientServiceImpl {
             }
             return false;
         } catch (SolrServerException | IOException e) {
-            throw new SolrClientServiceException("error while creating the index for table: " + table + ": " + e.getMessage(), e);
+            throw new SolrClientServiceException("error while creating the index for table: " + table + ": " +
+                                                 e.getMessage(), e);
         }
     }
 
@@ -173,11 +176,12 @@ public class SolrClientServiceImpl {
                 }
                 return true;
             } else {
-                throw new SolrClientServiceException("Couldn't update index schema, Response code: " + updateResponse.getStatus() +
-                        ", Errors: " + errors);
+                throw new SolrClientServiceException("Couldn't update index schema, Response code: " +
+                                                     updateResponse.getStatus() + ", Errors: " + errors);
             }
         } catch (SolrServerException | IOException e) {
-            throw new SolrClientServiceException("error while updating the index schema for table: " + table + ": " + e.getMessage(), e);
+            throw new SolrClientServiceException("error while updating the index schema for table: " + table + ": " +
+                                                 e.getMessage(), e);
         }
     }
 
@@ -191,7 +195,8 @@ public class SolrClientServiceImpl {
             updateFields.addAll(newFields);
         } else {
             updateFields = solrSchema.getFields().entrySet().stream()
-                    .map(field -> finalOldSchema.getField(field.getKey()) != null ? updateSchemaAndGetReplaceFields(finalOldSchema, field) :
+                    .map(field -> finalOldSchema.getField(field.getKey()) != null ?
+                                  updateSchemaAndGetReplaceFields(finalOldSchema, field) :
                      updateSchemaAndGetAddFields(finalOldSchema, field)).collect(Collectors.toList());
         }
         return updateFields;
@@ -255,22 +260,23 @@ public class SolrClientServiceImpl {
                     throw new SolrSchemaNotFoundException("Index schema for table: " + table + "is not found");
                 }
             } catch (SolrServerException | IOException | SolrException e) {
-                throw new SolrClientServiceException("error while retrieving the index schema for table: " + table + ": " + e.getMessage(), e);
+                throw new SolrClientServiceException("error while retrieving the index schema for table: " + table +
+                                                     ": " + e.getMessage(), e);
             }
         }
         return solrSchema;
     }
 
-    private static SolrSchema createSolrSchema(String uniqueKey, List<Map<String, Object>> fields) throws
-                                                                                                   SolrClientServiceException {
+    private static SolrSchema createSolrSchema(String uniqueKey, List<Map<String, Object>> fields)
+            throws SolrClientServiceException {
         SolrSchema solrSchema = new SolrSchema();
         solrSchema.setUniqueKey(uniqueKey);
         solrSchema.setFields(createIndexFields(fields));
         return solrSchema;
     }
 
-    private static Map<String, SolrSchemaField> createIndexFields(List<Map<String, Object>> fields) throws
-                                                                                                    SolrClientServiceException {
+    private static Map<String, SolrSchemaField> createIndexFields(List<Map<String, Object>> fields)
+            throws SolrClientServiceException {
         Map<String, SolrSchemaField> indexFields = new LinkedHashMap<>();
         String fieldName;
         for (Map<String, Object> fieldProperties : fields) {
@@ -278,7 +284,8 @@ public class SolrClientServiceImpl {
                 fieldName = fieldProperties.remove(SolrSchemaField.ATTR_FIELD_NAME).toString();
                 indexFields.put(fieldName, new SolrSchemaField(fieldProperties));
             } else {
-                throw new SolrClientServiceException("Fields must have an attribute called " + SolrSchemaField.ATTR_FIELD_NAME);
+                throw new SolrClientServiceException("Fields must have an attribute called " +
+                                                     SolrSchemaField.ATTR_FIELD_NAME);
             }
         }
         return indexFields;
@@ -288,7 +295,8 @@ public class SolrClientServiceImpl {
         try {
             if (collectionExists(table)) {
                 String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(table);
-                CollectionAdminRequest.Delete deleteRequest = CollectionAdminRequest.deleteCollection(tableNameWithTenant);
+                CollectionAdminRequest.Delete deleteRequest =
+                        CollectionAdminRequest.deleteCollection(tableNameWithTenant);
                 CollectionAdminResponse deleteRequestResponse =
                         deleteRequest.process(getSolrServiceClient(), tableNameWithTenant);
                 if (deleteRequestResponse.isSuccess() && collectionConfigExists(table)) {
@@ -301,13 +309,15 @@ public class SolrClientServiceImpl {
                         return true;
                     } else {
                         throw new SolrClientServiceException("Error in deleting index for table: " + table + ", " +
-                                                   ", Response code: " + configSetResponse.getStatus() + " , errors: " + errors.toString());
+                                ", Response code: " + configSetResponse.getStatus() + " , errors: " +
+                                errors.toString());
                     }
                 }
             }
         } catch (IOException | SolrServerException e) {
             log.error("error while deleting the index for table: " + table + ": " + e.getMessage(), e);
-            throw new SolrClientServiceException("error while deleting the index for table: " + table + ": " + e.getMessage(), e);
+            throw new SolrClientServiceException("error while deleting the index for table: " + table + ": " +
+                                                 e.getMessage(), e);
         }
         return false;
     }
@@ -338,18 +348,21 @@ public class SolrClientServiceImpl {
         try {
             listRequestReponse = listRequest.process(siddhiSolrClient);
             Object errors = listRequestReponse.getErrorMessages();
-            if (listRequestReponse.getStatus()== 0 && errors == null) {
+            if (listRequestReponse.getStatus() == 0 && errors == null) {
                 return listRequestReponse.getConfigSets().contains(tableNameWithTenantDomain);
             } else {
-                throw new SolrClientServiceException("Error in checking the existance of index configuration for table: " + table + ", " +
-                        ", Response code: " + listRequestReponse.getStatus() + " , errors: " + errors.toString());
+                throw new SolrClientServiceException("Error in checking the existance of index configuration for " +
+                        "table: '" + table + "', Response code: " +
+                        listRequestReponse.getStatus() + " , errors: " + errors.toString());
             }
         } catch (IOException | SolrServerException e) {
-            throw new SolrClientServiceException("Error while checking if index configurations exists for table: " + table, e);
+            throw new SolrClientServiceException("Error while checking if index configurations exists for table: " +
+                                                 table, e);
         }
     }
 
-    public void insertDocuments(String table, List<SolrIndexDocument> docs, boolean commitAsync) throws SolrClientServiceException {
+    public void insertDocuments(String table, List<SolrIndexDocument> docs, boolean commitAsync)
+            throws SolrClientServiceException {
         try {
             SiddhiSolrClient client = getSolrServiceClient();
             client.add(table, SolrTableUtils.getSolrInputDocuments(docs));
@@ -370,7 +383,8 @@ public class SolrClientServiceImpl {
                     client.commit(table);
                 }
             } catch (SolrServerException | IOException e) {
-                throw new SolrClientServiceException("Error while deleting index documents by ids, " + e.getMessage(), e);
+                throw new SolrClientServiceException("Error while deleting index documents by ids, " +
+                                                     e.getMessage(), e);
             }
         }
     }
@@ -384,7 +398,8 @@ public class SolrClientServiceImpl {
                     client.commit(table);
                 }
             } catch (SolrServerException | IOException e) {
-                throw new SolrClientServiceException("Error while deleting index documents by query, " + e.getMessage(), e);
+                throw new SolrClientServiceException("Error while deleting index documents by query, " +
+                                                     e.getMessage(), e);
             }
         }
     }

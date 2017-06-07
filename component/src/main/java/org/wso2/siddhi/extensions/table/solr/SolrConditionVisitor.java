@@ -32,19 +32,7 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
     private static final String SOLR_AND = "AND";
     private static final String SOLR_OR = "OR";
     private static final String SOLR_NOT = "NOT";
-    private static final String SQL_IN = "IN";
-    private static final String SQL_IS_NULL = "IS NULL";
-    private static final String SQL_COMPARE_LESS_THAN = "<";
-    private static final String SQL_COMPARE_GREATER_THAN = ">";
-    private static final String SQL_COMPARE_LESS_THAN_EQUAL = "<=";
-    private static final String SQL_COMPARE_GREATER_THAN_EQUAL = ">=";
-    private static final String SQL_COMPARE_EQUAL = "=";
-    private static final String SQL_COMPARE_NOT_EQUAL = "!=";   // "<>" ?
-    private static final String SQL_MATH_ADD = "+";
-    private static final String SQL_MATH_DIVIDE = "/";
-    private static final String SQL_MATH_MULTIPLY = "*";
     private static final String SQL_MATH_SUBTRACT = "-";
-    private static final String SQL_MATH_MOD = "%";
 
     private static final String OPEN_PARENTHESIS = "(";
     private static final String CLOSE_PARENTHESIS = ")";
@@ -179,24 +167,28 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
         if (!isStoreVariableOnRight) {
             switch (operator) {
                 case LESS_THAN:
-                    condition.append(OPEN_CURLY_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO).append(WHITESPACE);
+                    condition.append(OPEN_CURLY_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO)
+                            .append(WHITESPACE);
                     condition.append(currentStreamVariable);
                     condition.append(CLOSE_CURLY_BRACKET);
                     break;
                 case GREATER_THAN:
                     condition.append(OPEN_CURLY_BRACKET);
                     condition.append(currentStreamVariable);
-                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_CURLY_BRACKET);
+                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK)
+                            .append(CLOSE_CURLY_BRACKET);
                     break;
                 case LESS_THAN_EQUAL:
-                    condition.append(OPEN_SQUARE_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO).append(WHITESPACE);
+                    condition.append(OPEN_SQUARE_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO)
+                            .append(WHITESPACE);
                     condition.append(currentStreamVariable);
                     condition.append(CLOSE_SQUARE_BRACKET);
                     break;
                 case GREATER_THAN_EQUAL:
                     condition.append(OPEN_SQUARE_BRACKET);
                     condition.append(currentStreamVariable);
-                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_SQUARE_BRACKET);
+                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK)
+                            .append(CLOSE_SQUARE_BRACKET);
                     break;
                 case EQUAL :
                 case NOT_EQUAL:
@@ -209,24 +201,28 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
             isStoreVariableOnRight = false;
             switch (operator) {
                 case GREATER_THAN_EQUAL:
-                    condition.append(OPEN_CURLY_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO).append(WHITESPACE);
+                    condition.append(OPEN_CURLY_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO)
+                            .append(WHITESPACE);
                     condition.append(currentStreamVariable);
                     condition.append(CLOSE_CURLY_BRACKET);
                     break;
                 case LESS_THAN_EQUAL:
                     condition.append(OPEN_CURLY_BRACKET);
                     condition.append(currentStreamVariable);
-                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_CURLY_BRACKET);
+                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK)
+                            .append(CLOSE_CURLY_BRACKET);
                     break;
                 case GREATER_THAN:
-                    condition.append(OPEN_SQUARE_BRACKET).append(ASTERISK).append(WHITESPACE).append(TO).append(WHITESPACE);
+                    condition.append(OPEN_SQUARE_BRACKET).append(ASTERISK).append(WHITESPACE)
+                            .append(TO).append(WHITESPACE);
                     condition.append(currentStreamVariable);
                     condition.append(CLOSE_SQUARE_BRACKET);
                     break;
                 case LESS_THAN:
                     condition.append(OPEN_SQUARE_BRACKET);
                     condition.append(currentStreamVariable);
-                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_SQUARE_BRACKET);
+                    condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK)
+                            .append(CLOSE_SQUARE_BRACKET);
                     break;
                 case EQUAL:
                 case NOT_EQUAL:

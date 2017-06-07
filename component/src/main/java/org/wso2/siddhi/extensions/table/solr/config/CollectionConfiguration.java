@@ -28,10 +28,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "indexer-config")
 public class CollectionConfiguration {
-    private final static String DEFAULT_SOLR_URL = "localhost:9983";
-    private final static String BASE_CONFIG_SET = "gettingstarted";
-    private final static String DEFAULT_NO_OF_SHARDS = "2";
-    private final static String DEFAULT_NO_OF_REPLICA = "1";
+    private static final String DEFAULT_SOLR_URL = "localhost:9983";
+    private static final String BASE_CONFIG_SET = "gettingstarted";
+    private static final String DEFAULT_NO_OF_SHARDS = "2";
+    private static final String DEFAULT_NO_OF_REPLICA = "1";
     private String solrServerUrl;
     private String collectionName;
     private int noOfShards;
@@ -53,7 +53,7 @@ public class CollectionConfiguration {
         this.schema = schema;
     }
 
-    @XmlElement(name = "solr-cloud-url", defaultValue = DEFAULT_SOLR_URL )
+    @XmlElement(name = "solr-cloud-url", defaultValue = DEFAULT_SOLR_URL)
     public String getSolrServerUrl() {
         return solrServerUrl;
     }
@@ -81,6 +81,9 @@ public class CollectionConfiguration {
         return schema;
     }
 
+    /**
+     * Builder class for creating the CollectionConfiguration objects.
+     */
     public static class Builder {
         private String solrServerUrl;
         private String collectionName;

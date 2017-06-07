@@ -91,8 +91,7 @@ public class InsertToSolrTableTestCase {
         try {
             indexerService.deleteCollection("TEST2");
             indexerService.deleteCollection("TEST3");
-        }
-        finally {
+        } finally {
             indexerService.destroy();
         }
     }

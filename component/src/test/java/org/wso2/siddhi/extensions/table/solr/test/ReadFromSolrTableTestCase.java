@@ -510,8 +510,7 @@ public class ReadFromSolrTableTestCase {
             indexerService.deleteCollection("TEST8");
             indexerService.deleteCollection("TEST9");
             indexerService.deleteCollection("TEST10");
-        }
-        finally {
+        } finally {
             indexerService.destroy();
         }
     }

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extensions.table.solr.exceptions;
 
 /**
- * This class represents the exception class thrown from the {@link org.wso2.siddhi.extensions.table.solr.SolrConditionVisitor}
+ * This class represents the exception class thrown from the
+ * {@link org.wso2.siddhi.extensions.table.solr.SolrConditionVisitor}
  */
 public class SolrConditionVisitorException extends Exception {
     public SolrConditionVisitorException(String message) {

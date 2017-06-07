@@ -185,7 +185,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "   on StockTable.symbol==symbol;" +
                            "" +
                            "@info(name = 'query3') " +
-                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) in StockTable] " +
+                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) " +
+                           "in StockTable] " +
                            "insert into OutStream;";
 
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
@@ -263,7 +264,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "   on StockTable.symbol==symbol;" +
                            "" +
                            "@info(name = 'query3') " +
-                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) in StockTable] " +
+                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) " +
+                           "in StockTable] " +
                            "insert into OutStream;";
 
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
@@ -407,7 +409,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "   on StockTable.symbol==symbol;" +
                            "" +
                            "@info(name = 'query3') " +
-                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) in StockTable] " +
+                           "from CheckStockStream[(symbol==StockTable.symbol and  volume==StockTable.volume) " +
+                           "in StockTable] " +
                            "insert into OutStream;";
 
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);

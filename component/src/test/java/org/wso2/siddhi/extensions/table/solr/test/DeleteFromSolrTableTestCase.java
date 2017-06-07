@@ -346,7 +346,8 @@ public class DeleteFromSolrTableTestCase {
                            "@info(name = 'query2') " +
                            "from DeleteStockStream " +
                            "delete StockTable " +
-                           "   on StockTable.symbol==symbol and StockTable.price > price and  StockTable.volume == volume  ;";
+                           "on StockTable.symbol==symbol and StockTable.price > price and  " +
+                           "StockTable.volume == volume  ;";
 
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
@@ -386,7 +387,8 @@ public class DeleteFromSolrTableTestCase {
                            "@info(name = 'query2') " +
                            "from DeleteStockStream " +
                            "delete StockTable " +
-                           "   on StockTable.symbol=='IBM' and StockTable.price > 50 and  StockTable.volume == volume  ;";
+                           "   on StockTable.symbol=='IBM' and StockTable.price > 50 and  " +
+                           "StockTable.volume == volume  ;";
 
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");

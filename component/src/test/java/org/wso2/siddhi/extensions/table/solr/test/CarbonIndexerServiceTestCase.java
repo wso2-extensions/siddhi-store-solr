@@ -208,14 +208,14 @@ public class CarbonIndexerServiceTestCase {
         doc1.addField("id", "1");
         doc1.addField("_timestamp", System.currentTimeMillis());
         doc1.addField("IntField", 100);
-        doc1.addField("LongField", 100l);
+        doc1.addField("LongField", 100L);
         doc1.addField("FloatField", 100f);
         doc1.addField("DoubleField", 100d);
         doc1.addField("BoolField", true);
         SolrIndexDocument doc2 = new SolrIndexDocument();
         doc2.addField("id", "2");
         doc2.addField("IntField1", 1000);
-        doc2.addField("LongField1", 1000l);
+        doc2.addField("LongField1", 1000L);
         doc2.addField("FloatField1", 1000f);
         doc2.addField("DoubleField1", 1000d);
         doc2.addField("BoolField1", true);
@@ -261,7 +261,7 @@ public class CarbonIndexerServiceTestCase {
                                                   SolrServerException {
         List<String> ids = new ArrayList<>();
         ids.add("2");
-        indexerService.deleteDocuments(TABLE_T1,ids, false);
+        indexerService.deleteDocuments(TABLE_T1, ids, false);
         SiddhiSolrClient client = indexerService.getSolrServiceClient();
         SolrQuery query = new SolrQuery();
         query.setQuery("id:2");

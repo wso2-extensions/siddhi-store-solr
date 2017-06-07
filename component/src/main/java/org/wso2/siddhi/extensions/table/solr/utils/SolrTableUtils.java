@@ -96,7 +96,8 @@ public class SolrTableUtils {
         }
         File confDir = new File(path);
         if (!confDir.exists()) {
-            throw new SolrClientServiceException("The custom WSO2 index configuration directory does not exist at '" + path + "'. "
+            throw new SolrClientServiceException("The custom WSO2 index configuration directory does not exist at '"
+                    + path + "'. "
                     + "This can be given by correctly pointing to a valid configuration directory by setting the "
                     + "Java system property '" + WSO2_ANALYTICS_INDEX_CONF_DIRECTORY_SYS_PROP + "'.");
         }
@@ -172,7 +173,7 @@ public class SolrTableUtils {
             } else {
                 throw new SolrTableException("At least, the solr schema should contain the name and the type");
             }
-            schemaFields.put((String)fieldProperties.get(SolrSchemaField.ATTR_FIELD_NAME), new SolrSchemaField
+            schemaFields.put((String) fieldProperties.get(SolrSchemaField.ATTR_FIELD_NAME), new SolrSchemaField
                     (fieldProperties));
         }
         return new SolrSchema(SolrSchemaField.FIELD_ID, schemaFields);
