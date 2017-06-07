@@ -75,11 +75,15 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
+                            org.apache.solr.*
                         </Private-Package>
                         <Export-Package>
+                            !org.apache.solr.*,
+                            org.wso2.siddhi.extensions.store.solr.*
                         </Export-Package>
                         <Import-Package>
                             org.wso2.siddhi.*;version="${siddhi.version}",
+                            org.apache.solr.*;version="${solr.imp.pkg.version.range}
                             org.apache.log4j;version="${log4j.imp.pkg.version.range}",
                             javax.xml.bind,
                             javax.xml.bind.annotation
