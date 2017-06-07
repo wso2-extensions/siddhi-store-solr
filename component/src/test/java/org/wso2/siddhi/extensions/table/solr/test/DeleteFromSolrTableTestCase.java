@@ -29,28 +29,23 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 import java.io.IOException;
-import java.util.ServiceLoader;
 
 /**
  * This class represents the tests related to delete queries in Solr Store implementation
  */
 public class DeleteFromSolrTableTestCase {
     private static final Log log = LogFactory.getLog(DeleteFromSolrTableTestCase.class);
-    private static SolrClientService indexerService;
+    private static SolrClientServiceImpl indexerService;
 
     @BeforeClass
     public static void startTest() {
         log.info("== Solr Table DELETE tests started ==");
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        if (indexerService == null) {
-            indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-            Assert.assertTrue(indexerService != null);
-        }
+        indexerService = SolrClientServiceImpl.getInstance();
     }
 
     @AfterClass

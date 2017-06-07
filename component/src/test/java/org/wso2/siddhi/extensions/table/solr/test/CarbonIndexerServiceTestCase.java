@@ -28,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrIndexDocument;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchemaField;
@@ -36,13 +35,13 @@ import org.wso2.siddhi.extensions.table.solr.config.CollectionConfiguration;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrSchemaNotFoundException;
 import org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * This class contains the unit tests for indexer service;
@@ -51,18 +50,12 @@ import java.util.ServiceLoader;
 public class CarbonIndexerServiceTestCase {
 
     private static final String TABLE_T1 = "T1";
-    private static SolrClientService indexerService;
+    private static SolrClientServiceImpl indexerService;
 
 
     @BeforeClass
     public static void init() throws SolrClientServiceException {
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        if (indexerService == null) {
-            indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-            if (indexerService == null) {
-                throw new SolrClientServiceException("Indexer Service cannot be loaded!");
-            }
-        }
+        indexerService = SolrClientServiceImpl.getInstance();
     }
     @Test
     public void step1_testCreateIndexForTable() throws SolrClientServiceException {

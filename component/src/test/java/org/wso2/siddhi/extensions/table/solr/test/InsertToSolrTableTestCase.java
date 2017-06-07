@@ -23,10 +23,8 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
-
-import java.util.ServiceLoader;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 /**
  * This test class contains the test cases related to inserting the events to solr event table
@@ -86,9 +84,7 @@ public class InsertToSolrTableTestCase {
 
     @AfterClass
     public static void deleteTables() throws Exception {
-        SolrClientService indexerService;
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        indexerService = analyticsIndexServiceServiceLoader.iterator().next();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.getInstance();
         if (indexerService == null) {
             throw new SolrClientServiceException("Indexer Service cannot be loaded!");
         }

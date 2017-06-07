@@ -159,6 +159,7 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
             case NOT_EQUAL:
                 condition.append(EXCLAMATION_MARK);
                 break;
+            default:
         }
     }
 
@@ -197,11 +198,7 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
                     condition.append(currentStreamVariable);
                     condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_SQUARE_BRACKET);
                     break;
-                case EQUAL:
-                    condition.append(DOUBLE_QUOTE);
-                    condition.append(currentStreamVariable);
-                    condition.append(DOUBLE_QUOTE);
-                    break;
+                case EQUAL :
                 case NOT_EQUAL:
                     condition.append(DOUBLE_QUOTE);
                     condition.append(currentStreamVariable);
@@ -232,10 +229,6 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
                     condition.append(WHITESPACE).append(TO).append(WHITESPACE).append(ASTERISK).append(CLOSE_SQUARE_BRACKET);
                     break;
                 case EQUAL:
-                    condition.append(DOUBLE_QUOTE);
-                    condition.append(currentStreamVariable);
-                    condition.append(DOUBLE_QUOTE);
-                    break;
                 case NOT_EQUAL:
                     condition.append(DOUBLE_QUOTE);
                     condition.append(currentStreamVariable);

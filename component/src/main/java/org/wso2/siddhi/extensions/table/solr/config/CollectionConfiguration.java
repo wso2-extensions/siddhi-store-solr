@@ -58,17 +58,9 @@ public class CollectionConfiguration {
         return solrServerUrl;
     }
 
-    private void setSolrServerUrl(String solrServerUrl) {
-        this.solrServerUrl = solrServerUrl;
-    }
-
     @XmlElement(name = "no-of-shards", defaultValue = DEFAULT_NO_OF_SHARDS)
     public int getNoOfShards() {
         return noOfShards;
-    }
-
-    private void setNoOfShards(int noOfShards) {
-        this.noOfShards = noOfShards;
     }
 
     @XmlElement(name = "no-of-replica", defaultValue = DEFAULT_NO_OF_REPLICA)
@@ -76,33 +68,17 @@ public class CollectionConfiguration {
         return noOfReplicas;
     }
 
-    private void setNoOfReplicas(int noOfReplicas) {
-        this.noOfReplicas = noOfReplicas;
-    }
-
     @XmlElement(name = "default-config-set", defaultValue = BASE_CONFIG_SET)
     public String getConfigSet() {
         return configSet;
-    }
-
-    private void setConfigSet(String configSet) {
-        this.configSet = configSet;
     }
 
     public String getCollectionName() {
         return collectionName;
     }
 
-    private void setCollectionName(String collectionName) {
-        this.collectionName = collectionName;
-    }
-
     public SolrSchema getSchema() {
         return schema;
-    }
-
-    private void setSchema(SolrSchema schema) {
-        this.schema = schema;
     }
 
     public static class Builder {

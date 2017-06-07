@@ -24,13 +24,11 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchemaField;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrSchemaNotFoundException;
-
-import java.util.ServiceLoader;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 /**
  * This class contains the test cases related to SolrEventTable
@@ -38,22 +36,18 @@ import java.util.ServiceLoader;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DefineSolrTableTestCase {
 
-    private static SolrClientService indexerService;
+    private static SolrClientServiceImpl indexerService;
 
     @Test
     public void testDefineSolrTable() {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', url='localhost:9983', collection='TEST1', base.config='gettingstarted', " +
-                " schema='time long stored, date string stored', commit.async='true') " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
         siddhiManager.createExecutionPlanRuntime(defineQuery);
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        if (this.indexerService == null) {
-            this.indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-            Assert.assertTrue(indexerService != null);
-        }
+        indexerService = SolrClientServiceImpl.getInstance();
         try {
             Assert.assertTrue(indexerService.collectionExists("TEST1"));
             SolrSchema schema = indexerService.getSolrSchema("TEST1");

@@ -28,6 +28,9 @@ import java.util.Map;
  */
 public class SolrIndexDocument extends SolrInputDocument {
 
+
+    private static final long serialVersionUID = -2176046055014616443L;
+
     public SolrIndexDocument(String... fields) {
         super(fields);
     }

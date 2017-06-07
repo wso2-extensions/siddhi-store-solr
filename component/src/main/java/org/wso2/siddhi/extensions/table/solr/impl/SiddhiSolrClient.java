@@ -43,6 +43,7 @@ import java.util.List;
  */
 public class SiddhiSolrClient extends SolrClient {
 
+    private static final long serialVersionUID = -6070746447077156187L;
     private SolrClient solrClient;
 
     public SiddhiSolrClient(SolrClient solrClient) {

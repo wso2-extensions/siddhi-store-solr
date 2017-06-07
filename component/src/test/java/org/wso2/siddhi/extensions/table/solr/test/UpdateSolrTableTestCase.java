@@ -33,13 +33,12 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ServiceLoader;
 
 /**
  * This test class contains the tests related to update queries for Solr stores
@@ -49,7 +48,7 @@ public class UpdateSolrTableTestCase {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    private static SolrClientService indexerService;
+    private static SolrClientServiceImpl indexerService;
 
 
     @Before
@@ -62,11 +61,7 @@ public class UpdateSolrTableTestCase {
     @BeforeClass
     public static void startTest() {
         log.info("== Solr Table UPDATE tests started ==");
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        if (indexerService == null) {
-            indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-            Assert.assertTrue(indexerService != null);
-        }
+        indexerService = SolrClientServiceImpl.getInstance();
     }
 
     @AfterClass

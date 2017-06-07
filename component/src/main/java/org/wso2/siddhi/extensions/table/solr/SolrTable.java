@@ -18,6 +18,8 @@
 
 package org.wso2.siddhi.extensions.table.solr;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.wso2.siddhi.annotation.Example;
@@ -67,7 +69,7 @@ import java.util.Map;
                 @Parameter(name = "collection",
                         description = "The name of the solr collection.",
                         type = {DataType.STRING}, optional = true),
-                @Parameter(name = "url",
+                @Parameter(name = "zookeper.url",
                         description = "The zookeeper url of the solr cloud",
                         type = {DataType.STRING}, optional = true),
                 @Parameter(name = "shards",
@@ -91,7 +93,8 @@ import java.util.Map;
         },
         examples = {
                 @Example(
-                        syntax = "@store(type='solr', url='localhost:9983', collection='TEST1', base.config='gettingstarted', " +
+                        syntax = "@store(type='solr', zookeeper.url='localhost:9983', collection='TEST1', base" +
+                                 ".config='gettingstarted', " +
                                  "shards='2', replicas='2', schema='time long stored, date string stored', commit.async='true') " +
                                  "define table Footable(time long, date string);",
                 description = "Above example will create a solr collection which has two shards with two replicas " +
@@ -104,13 +107,14 @@ import java.util.Map;
 public class SolrTable extends AbstractRecordTable {
 
     private static final String SET_MODIFIER = "set";
-    private static final int ITERATOR_BATCH_SIZE = 1000;
-    private SolrClientService solrClientService;
+    private static final Log log = LogFactory.getLog(SolrTable.class);
+    private SolrClientServiceImpl solrClientService;
     private List<Attribute> attributes;
     private String collection;
     private List<String> primaryKeys;
     private boolean commitAsync;
     private boolean mergeSchema;
+    private int readBatchSize;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
@@ -120,32 +124,38 @@ public class SolrTable extends AbstractRecordTable {
         Annotation storeAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE, tableDefinition
                 .getAnnotations());
         if (primaryKeyAnnotation != null) {
-            primaryKeys = new ArrayList<>();
+            this.primaryKeys = new ArrayList<>();
             List<Element> primaryKeyElements = primaryKeyAnnotation.getElements();
             primaryKeyElements.forEach(element -> {
-                primaryKeys.add(element.getValue().trim());
+                this.primaryKeys.add(element.getValue().trim());
             });
         }
         if (storeAnnotation != null) {
-            collection = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COLLECTION);
+            this.collection = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COLLECTION);
             String url = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_URL);
-            int shards = Integer.parseInt(storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SHARDS));
-            int replicas = Integer.parseInt(storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_REPLICA));
+            String shards = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SHARDS);
+            String replicas = storeAnnotation.getElement(SolrTableConstants
+                                                                 .ANNOTATION_ELEMENT_REPLICAS);
             String schema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SCHEMA);
             String configSet = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_CONFIGSET);
             String commitAsync = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COMMIT_ASYNC);
             String mergeSchema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_MERGE_SCHEMA);
 
 
-            if (collection == null || collection.trim().isEmpty()) {
-                collection = tableDefinition.getId();
+            if (this.collection == null || this.collection.trim().isEmpty()) {
+                this.collection = tableDefinition.getId();
             }
             if (url == null || url.trim().isEmpty()) {
-                throw new ExecutionPlanCreationException("SolrCloud url cannot be null or empty");
+                url = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_URL, SolrTableConstants
+                        .DEFAULT_ZOOKEEPER_URL);
             }
-            if (shards < 0 || replicas < 0 ) {
-                throw new ExecutionPlanCreationException("No of shards and no of replicas cannot be empty or less " +
-                                                         "than 1");
+            if (shards == null) {
+                shards = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_SHARDS, SolrTableConstants
+                        .DEFAULT_SHARD_COUNT);
+            }
+            if (replicas == null) {
+                replicas = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_REPLICAS, SolrTableConstants
+                        .DEFAULT_REPLICAS_COUNT);
             }
             if (commitAsync == null || commitAsync.isEmpty()) {
                 this.commitAsync = true;
@@ -157,15 +167,20 @@ public class SolrTable extends AbstractRecordTable {
             } else {
                 this.mergeSchema = false;
             }
+            this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants.PROPERTY_READ_BATCH_SIZE,
+                                                                          SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
             SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
             CollectionConfiguration collectionConfig = new CollectionConfiguration.Builder().collectionName
-                    (collection).solrServerUrl(url).shards(shards).replicas(replicas).configs(configSet).schema
+                    (this.collection).solrServerUrl(url).shards(Integer.parseInt(shards)).replicas(Integer.parseInt
+                    (replicas)).configs
+                    (configSet).schema
                     (solrSchema).build();
             solrClientService = SolrClientServiceImpl.getInstance();
             try {
                 solrClientService.createCollection(collectionConfig);
-                solrClientService.updateSolrSchema(collection, solrSchema, true);
+                solrClientService.updateSolrSchema(this.collection, solrSchema, this.mergeSchema);
             } catch (SolrClientServiceException e) {
+                log.error("Error while initializing the Solr Event table: " + e.getMessage(), e);
                 throw new ExecutionPlanCreationException("Error while initializing the Solr Event table: " + e
                         .getMessage(), e);
             }
@@ -193,8 +208,8 @@ public class SolrTable extends AbstractRecordTable {
             compiledCondition) {
         try {
             String condition = SolrTableUtils.resolveCondition((SolrCompiledCondition) compiledCondition,
-                                                               findConditionParameterMap);
-            return new SolrRecordIterator(condition, solrClientService, collection, ITERATOR_BATCH_SIZE, attributes);
+                                                               findConditionParameterMap, collection);
+            return new SolrRecordIterator(condition, solrClientService, collection, readBatchSize, attributes);
         } catch (SolrClientServiceException e) {
             throw new SolrTableException("Error while searching records in Solr Event Table: " + e.getMessage(), e);
         }
@@ -211,7 +226,7 @@ public class SolrTable extends AbstractRecordTable {
         try {
             for (Map<String, Object> deleteConditionParameterMap : deleteConditionParameterMaps) {
                 String condition = SolrTableUtils.resolveCondition((SolrCompiledCondition) compiledCondition,
-                                                                   deleteConditionParameterMap);
+                                                                   deleteConditionParameterMap, collection);
                 solrClientService.deleteDocuments(collection, condition, commitAsync);
             }
         } catch (SolrClientServiceException e) {
@@ -264,7 +279,7 @@ public class SolrTable extends AbstractRecordTable {
             updateDocs.addAll(addDocs);
         }
         if (!deleteDocIds.isEmpty()) {
-            solrClientService.deleteDocuments(collection, deleteDocIds, commitAsync);
+            solrClientService.deleteDocuments(collection, deleteDocIds, false);
         }
         solrClientService.insertDocuments(collection, updateDocs, commitAsync);
     }

@@ -30,8 +30,6 @@ import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.apache.solr.client.solrj.response.ConfigSetAdminResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.SolrException;
-import org.wso2.siddhi.core.exception.CannotLoadConfigurationException;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrIndexDocument;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.table.solr.beans.SolrSchemaField;
@@ -41,7 +39,6 @@ import org.wso2.siddhi.extensions.table.solr.exceptions.SolrSchemaNotFoundExcept
 import org.wso2.siddhi.extensions.table.solr.utils.SolrTableUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -49,90 +46,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 /**
  * This class represents a concrete implementation of {@link org.wso2.siddhi.extensions.table.solr.SolrClientService}
  */
-public class SolrClientServiceImpl implements SolrClientService {
+public class SolrClientServiceImpl {
 
     private static final String ATTR_ERRORS = "errors";
     private static final String ATTR_COLLECTIONS = "collections";
     private static final String SOLR_CONFIG_FILE = "solr-cloud-config.xml";
     private static Log log = LogFactory.getLog(SolrClientServiceImpl.class);
     private volatile SiddhiSolrClient indexerClient = null;
-    private HashMap<String, SiddhiSolrClient> indexerClients = new HashMap<>();
     private CollectionConfiguration glabalCollectionConfig;
     private Map<String, SolrSchema> solrSchemaCache = new ConcurrentHashMap<>();
-    private static SolrClientService solrClientService = new SolrClientServiceImpl();
+    private static SolrClientServiceImpl solrClientService = new SolrClientServiceImpl();
 
     private SolrClientServiceImpl() {
-        try {
-            glabalCollectionConfig = loadGlobalCollectionConfigurations();
-        } catch (CannotLoadConfigurationException e) {
-            log.error("Failed to initialize Solr cloud service : " + e.getMessage(), e);
-        }
+
     }
 
-    public static SolrClientService  getInstance() {
+    public static SolrClientServiceImpl  getInstance() {
         return solrClientService;
     }
 
-    private CollectionConfiguration loadGlobalCollectionConfigurations() throws CannotLoadConfigurationException {
-
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(CollectionConfiguration.class);
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            ClassLoader classLoader = getClass().getClassLoader();
-            InputStream inputStream = classLoader.getResourceAsStream(SOLR_CONFIG_FILE);
-            if (inputStream == null) {
-                    throw new CannotLoadConfigurationException(SOLR_CONFIG_FILE + " is not found in the classpath");
-            }
-            return (CollectionConfiguration) unmarshaller.unmarshal(inputStream);
-        } catch (JAXBException e) {
-            throw new CannotLoadConfigurationException(
-                    "Error in loading solr cloud configuration: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
     public SiddhiSolrClient getSolrServiceClient() throws SolrClientServiceException {
         if (indexerClient == null) {
             synchronized (this) {
                 if (indexerClient == null) {
-                    if (glabalCollectionConfig != null) {
-                        SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
-                        indexerClient = new SiddhiSolrClient(client);
-                    }
+                    SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
+                    indexerClient = new SiddhiSolrClient(client);
                 }
             }
         }
         return indexerClient;
     }
 
-
-    public SiddhiSolrClient getSolrServiceClient(String url) throws SolrClientServiceException {
-        SiddhiSolrClient siddhiSolrClient = indexerClients.get(url);
-        if (siddhiSolrClient == null) {
-            synchronized (this) {
-                if (siddhiSolrClient == null) {
-                    if (glabalCollectionConfig != null) {
-                        SolrClient client = new CloudSolrClient.Builder().withZkHost(glabalCollectionConfig.getSolrServerUrl()).build();
-                        siddhiSolrClient = new SiddhiSolrClient(client);
-                        indexerClients.put(url, siddhiSolrClient);
-                    }
-                }
-            }
-        }
-        return siddhiSolrClient;
-    }
-
-    @Override
     public boolean createCollection(CollectionConfiguration config)
             throws SolrClientServiceException {
         String table = config.getCollectionName();
+        if (glabalCollectionConfig == null) {
+            glabalCollectionConfig = config;
+        }
         String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(table);
         try {
             if (!collectionExists(table)) {
@@ -152,7 +106,6 @@ public class SolrClientServiceImpl implements SolrClientService {
             }
             return false;
         } catch (SolrServerException | IOException e) {
-            log.error("error while creating the index for table: " + table + ": " + e.getMessage(), e);
             throw new SolrClientServiceException("error while creating the index for table: " + table + ": " + e.getMessage(), e);
         }
     }
@@ -183,8 +136,8 @@ public class SolrClientServiceImpl implements SolrClientService {
                                                         config.getNoOfReplicas());
         createRequest.setMaxShardsPerNode(config.getNoOfShards());
         CollectionAdminResponse collectionAdminResponse = createRequest.process(getSolrServiceClient());
-        Object errors = collectionAdminResponse.getErrorMessages();
         if (!collectionAdminResponse.isSuccess()) {
+            Object errors = collectionAdminResponse.getErrorMessages();
             throw new SolrClientServiceException("Error in deploying initial solr configset for collection: " +
                                                  tableNameWithTenant + ", Response code: " + collectionAdminResponse
                     .getStatus() + " , errors: " + errors.toString());
@@ -192,7 +145,6 @@ public class SolrClientServiceImpl implements SolrClientService {
         return true;
     }
 
-    @Override
     public boolean updateSolrSchema(String table, SolrSchema solrSchema, boolean merge)
             throws SolrClientServiceException {
         SolrSchema oldSchema;
@@ -225,7 +177,6 @@ public class SolrClientServiceImpl implements SolrClientService {
                         ", Errors: " + errors);
             }
         } catch (SolrServerException | IOException e) {
-            log.error("error while updating the index schema for table: " + table + ": " + e.getMessage(), e);
             throw new SolrClientServiceException("error while updating the index schema for table: " + table + ": " + e.getMessage(), e);
         }
     }
@@ -284,7 +235,6 @@ public class SolrClientServiceImpl implements SolrClientService {
         return fields;
     }
 
-    @Override
     public SolrSchema getSolrSchema(String table)
             throws SolrClientServiceException, SolrSchemaNotFoundException {
         SolrClient client = getSolrServiceClient();
@@ -305,7 +255,6 @@ public class SolrClientServiceImpl implements SolrClientService {
                     throw new SolrSchemaNotFoundException("Index schema for table: " + table + "is not found");
                 }
             } catch (SolrServerException | IOException | SolrException e) {
-                log.error("error while retrieving the index schema for table: " + table + ": " + e.getMessage(), e);
                 throw new SolrClientServiceException("error while retrieving the index schema for table: " + table + ": " + e.getMessage(), e);
             }
         }
@@ -335,7 +284,6 @@ public class SolrClientServiceImpl implements SolrClientService {
         return indexFields;
     }
 
-    @Override
     public boolean deleteCollection(String table) throws SolrClientServiceException {
         try {
             if (collectionExists(table)) {
@@ -364,7 +312,6 @@ public class SolrClientServiceImpl implements SolrClientService {
         return false;
     }
 
-    @Override
     public boolean collectionExists(String table) throws SolrClientServiceException {
         CollectionAdminRequest.List listRequest = CollectionAdminRequest.listCollections();
         String tableWithTenant = SolrTableUtils.getCollectionNameWithDomainName(table);
@@ -379,12 +326,10 @@ public class SolrClientServiceImpl implements SolrClientService {
                         ", Response code: " + listResponse.getStatus() + " , errors: " + errors.toString());
             }
         } catch (IOException | SolrServerException e) {
-            log.error("Error while checking the existence of index for table : " + table, e);
             throw new SolrClientServiceException("Error while checking the existence of index for table : " + table, e);
         }
     }
 
-    @Override
     public boolean collectionConfigExists(String table) throws SolrClientServiceException {
         ConfigSetAdminResponse.List listRequestReponse;
         SiddhiSolrClient siddhiSolrClient = getSolrServiceClient();
@@ -400,12 +345,10 @@ public class SolrClientServiceImpl implements SolrClientService {
                         ", Response code: " + listRequestReponse.getStatus() + " , errors: " + errors.toString());
             }
         } catch (IOException | SolrServerException e) {
-            log.error("Error while checking if index configurations exists for table: " + table, e);
             throw new SolrClientServiceException("Error while checking if index configurations exists for table: " + table, e);
         }
     }
 
-    @Override
     public void insertDocuments(String table, List<SolrIndexDocument> docs, boolean commitAsync) throws SolrClientServiceException {
         try {
             SiddhiSolrClient client = getSolrServiceClient();
@@ -414,12 +357,10 @@ public class SolrClientServiceImpl implements SolrClientService {
                 client.commit(table);
             }
         } catch (SolrServerException | IOException e) {
-            log.error("Error while inserting the documents to index for table: " + table, e);
             throw new SolrClientServiceException("Error while inserting the documents to index for table: " + table, e);
         }
     }
 
-    @Override
     public void deleteDocuments(String table, List<String> ids, boolean commitAsync) throws SolrClientServiceException {
         if (ids != null && !ids.isEmpty()) {
             SiddhiSolrClient client = getSolrServiceClient();
@@ -429,13 +370,11 @@ public class SolrClientServiceImpl implements SolrClientService {
                     client.commit(table);
                 }
             } catch (SolrServerException | IOException e) {
-                log.error("Error while deleting index documents by ids, " + e.getMessage(), e);
                 throw new SolrClientServiceException("Error while deleting index documents by ids, " + e.getMessage(), e);
             }
         }
     }
 
-    @Override
     public void deleteDocuments(String table, String query, boolean commitAsync) throws SolrClientServiceException {
         if (query != null && !query.isEmpty()) {
             SiddhiSolrClient client = getSolrServiceClient();
@@ -445,20 +384,17 @@ public class SolrClientServiceImpl implements SolrClientService {
                     client.commit(table);
                 }
             } catch (SolrServerException | IOException e) {
-                log.error("Error while deleting index documents by query, " + e.getMessage(), e);
                 throw new SolrClientServiceException("Error while deleting index documents by query, " + e.getMessage(), e);
             }
         }
     }
 
-    @Override
     public void destroy() throws SolrClientServiceException {
         try {
             if (indexerClient != null) {
                 indexerClient.close();
             }
         } catch (IOException e) {
-            log.error("Error while destroying the indexer service, " + e.getMessage(), e);
             throw new SolrClientServiceException("Error while destroying the indexer service, " + e.getMessage(), e);
         }
         indexerClient = null;

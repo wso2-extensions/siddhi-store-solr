@@ -157,10 +157,10 @@ public class SolrTableUtils {
 
     public static SolrSchema createIndexSchema(String schema) {
         Map<String, SolrSchemaField> schemaFields = new HashMap<>();
-        String[] fieldsWithProperties = schema.split(",");
+        String[] fieldsWithProperties = schema.split("\\s*,\\s*");
         for (String fieldWithProperties : fieldsWithProperties) {
             Map<String, Object> fieldProperties = new HashMap<>();
-            String[] properties = fieldWithProperties.trim().split(" ");
+            String[] properties = fieldWithProperties.trim().split("\\s+");
             if (properties.length > 1) {
                 fieldProperties.put(SolrSchemaField.ATTR_FIELD_NAME, properties[0]);
                 fieldProperties.put(SolrSchemaField.ATTR_TYPE, properties[1]);
@@ -208,18 +208,24 @@ public class SolrTableUtils {
         return solrIndexDocument;
     }
 
-    public static String resolveCondition(SolrCompiledCondition compiledCondition, Map<String, Object> parameters) {
+    public static String resolveCondition(SolrCompiledCondition compiledCondition, Map<String, Object> parameters,
+                                          String collection) {
         String condition = compiledCondition.getCompiledQuery();
+        if (log.isDebugEnabled()) {
+            log.debug("compiled condition for collection '" + collection + "': " + condition);
+        }
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue();
             String namePlaceholder = Pattern.quote("[" + name + "]");
             condition = condition.replaceAll(namePlaceholder, value.toString());
         }
-
         //set solr "select all" query if condition is "true"
         if (condition.equalsIgnoreCase("\"" + Boolean.TRUE.toString() + "\"")) {
             condition = "*:*";
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Resolved condition for collection '" + collection + "': " + condition);
         }
         return condition;
     }
@@ -235,7 +241,7 @@ public class SolrTableUtils {
         }
         /* to make sure, we don't have an empty string */
         builder.append("");
-        byte[] data = builder.toString().getBytes(Charset.defaultCharset()); //TODO: UTF8
+        byte[] data = builder.toString().getBytes(Charset.forName("UTF-8"));
         return UUID.nameUUIDFromBytes(data).toString();
     }
 
@@ -244,13 +250,5 @@ public class SolrTableUtils {
         secureRandom.get().nextBytes(data);
         ByteBuffer buff = ByteBuffer.wrap(data);
         return new UUID(buff.getLong(), buff.getLong()).toString();
-    }
-
-    private static Map<String, Object> extractValues(SolrInputDocument doc) {
-        Map<String, Object> values = new HashMap<>();
-        for (Map.Entry<String, SolrInputField> entry : doc.entrySet()) {
-            values.put(entry.getKey(), entry.getValue().getValue());
-        }
-        return values;
     }
 }

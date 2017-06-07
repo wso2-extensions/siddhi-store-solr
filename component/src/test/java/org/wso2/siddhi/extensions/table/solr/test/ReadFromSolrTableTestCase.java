@@ -28,11 +28,9 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
-import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 
 import java.util.Arrays;
-import java.util.ServiceLoader;
 
 /**
  * This class contains the tests related to reading from a solr event table
@@ -503,12 +501,7 @@ public class ReadFromSolrTableTestCase {
 
     @AfterClass
     public static void deleteTables() throws Exception {
-        SolrClientService indexerService;
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-        if (indexerService == null) {
-            throw new SolrClientServiceException("Indexer Service cannot be loaded!");
-        }
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.getInstance();
         try {
             indexerService.deleteCollection("TEST4");
             indexerService.deleteCollection("TEST5");

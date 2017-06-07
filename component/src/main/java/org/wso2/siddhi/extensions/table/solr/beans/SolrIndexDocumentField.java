@@ -25,6 +25,8 @@ import org.apache.solr.common.SolrInputField;
  */
 public class SolrIndexDocumentField extends SolrInputField {
 
+    private static final long serialVersionUID = 7166526003567985768L;
+
     public SolrIndexDocumentField(String n) {
         super(n);
     }

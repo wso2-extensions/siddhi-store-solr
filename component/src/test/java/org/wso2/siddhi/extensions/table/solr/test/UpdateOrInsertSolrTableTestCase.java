@@ -33,13 +33,12 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.extensions.table.solr.SolrClientService;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 
 import java.io.IOException;
-import java.util.ServiceLoader;
 
 /**
  * This class contains the tests related to update or insert query
@@ -49,7 +48,7 @@ public class UpdateOrInsertSolrTableTestCase {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    private static SolrClientService indexerService;
+    private static SolrClientServiceImpl indexerService;
 
     @Before
     public void init() {
@@ -61,11 +60,7 @@ public class UpdateOrInsertSolrTableTestCase {
     @BeforeClass
     public static void startTest() {
         log.info("== Solr Table UPDATE/INSERT tests started ==");
-        ServiceLoader<SolrClientService> analyticsIndexServiceServiceLoader = ServiceLoader.load(SolrClientService.class);
-        if (indexerService == null) {
-            indexerService = analyticsIndexServiceServiceLoader.iterator().next();
-            Assert.assertTrue(indexerService != null);
-        }
+        indexerService = SolrClientServiceImpl.getInstance();
     }
 
     @AfterClass

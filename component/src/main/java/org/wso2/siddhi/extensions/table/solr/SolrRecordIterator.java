@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.table.solr.exceptions.SolrIteratorException;
 import org.wso2.siddhi.extensions.table.solr.impl.SiddhiSolrClient;
+import org.wso2.siddhi.extensions.table.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
     private int start;
     private int count;
 
-    public SolrRecordIterator(String condition, SolrClientService service,String collection, int batchSize,
+    public SolrRecordIterator(String condition, SolrClientServiceImpl service, String collection, int batchSize,
                               List<Attribute> attributes)
             throws SolrClientServiceException {
         this.batchSize = batchSize;
@@ -59,6 +60,7 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
         this.start = 0;
         this.count = batchSize;
     }
+
     @Override
     public void close() throws IOException {
         this.solrClient = null;
@@ -68,7 +70,7 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
     public boolean hasNext() {
         synchronized (this) {
             try {
-                if (solrDocumentIterator != null) {
+                if (solrDocumentIterator != null && solrDocuments != null) {
                     if (solrDocumentIterator.hasNext()) {
                         return true;
                     } else {
@@ -99,25 +101,26 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
 
     @Override
     public Object[] next() {
-        if (hasNext()) {
-            SolrDocument solrDocument = solrDocumentIterator.next();
+        synchronized (this) {
             List<Object> fieldValues = new ArrayList<>();
-            for (Attribute attribute : attributes) {
-                Object fieldValue = solrDocument.getFieldValue(attribute.getName());
-                fieldValues.add(fieldValue);
+            if (hasNext() && solrDocumentIterator != null) {
+                SolrDocument solrDocument = solrDocumentIterator.next();
+                for (Attribute attribute : attributes) {
+                    Object fieldValue = solrDocument.getFieldValue(attribute.getName());
+                    fieldValues.add(fieldValue);
+                }
             }
             return fieldValues.toArray();
-        } else {
-            return null;
         }
     }
 
     public SolrDocument nextDocument() {
-        if (hasNext()) {
-            SolrDocument solrDocument = solrDocumentIterator.next();
-            return solrDocument;
-        } else {
-            return null;
+        synchronized (this) {
+            if (hasNext() && solrDocumentIterator != null) {
+                return solrDocumentIterator.next();
+            } else {
+                return null;
+            }
         }
     }
 }
