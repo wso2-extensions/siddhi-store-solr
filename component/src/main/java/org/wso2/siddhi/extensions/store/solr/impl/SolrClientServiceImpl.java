@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * This class represents a concrete implementation of {@link org.wso2.siddhi.extensions.table.solr.SolrClientService}
+ * This class represents the client service which interact with the solr cloud
  */
 public class SolrClientServiceImpl {
 
