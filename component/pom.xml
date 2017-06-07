@@ -79,7 +79,11 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.apache.solr.*
+                            org.apache.solr.*,
+                            org.noggit.*,
+                            org.apache.http.*,
+                            org.apache.zookeeper.*,
+                            org.apache.jute.*
                         </Private-Package>
                         <Export-Package>
                             !org.apache.solr.*,

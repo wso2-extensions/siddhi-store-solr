@@ -38,5 +38,6 @@ public class SolrTableConstants {
     public static final String DEFAULT_SHARD_COUNT = "2";
     public static final String DEFAULT_REPLICAS_COUNT = "1";
     public static final String DEFAULT_READ_ITERATOR_BATCH_SIZE = "1000";
+    public static final String DEFAULT_SOLR_BASE_CONFIG_NAME = "gettingstarted";
 
 }

@@ -168,6 +168,10 @@ public class SolrTable extends AbstractRecordTable {
             } else {
                 this.mergeSchema = false;
             }
+            if (configSet == null || configSet.isEmpty()) {
+                configSet = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_CONFIGSET,
+                                                    SolrTableConstants.DEFAULT_SOLR_BASE_CONFIG_NAME);
+            }
             this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants
                     .PROPERTY_READ_BATCH_SIZE, SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
             SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
