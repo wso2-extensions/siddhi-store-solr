@@ -46,7 +46,7 @@
     </profiles>
 
     <properties>
-        <siddhi.version>4.0.0-SNAPSHOT</siddhi.version>
+        <siddhi.version>4.0.0-M4</siddhi.version>
         <siddhi.impl.pkg.version.range>[4.0.0, 4.1.0)</siddhi.impl.pkg.version.range>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
