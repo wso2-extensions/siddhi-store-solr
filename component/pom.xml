@@ -39,6 +39,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
@@ -99,7 +103,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/*TestCase.java</include>
+                        <include>**/InsertToSolrTableTestCase.java</include>
                     </includes>
                     <argLine>-ea -Xmx512m</argLine>
                 </configuration>
