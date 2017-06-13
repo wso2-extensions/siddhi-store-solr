@@ -22,7 +22,7 @@ Features Supported
 ##### Prerequisites for using the feature
  - A Solr server should be started in cloud mode.
  - A Default configset needs to be uploaded to the zookeper of SolrCloud (If you test in your local machine, you can
- start the Solr cloud using ./solr -e cloud and upload the "basic_configs" configset)
+ start the Solr cloud using  command "./solr -e cloud" and upload the "basic_configs" configset)
 
 ---
 ##### Deploying the feature
