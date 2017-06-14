@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.extensions.store.solr.test;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -38,7 +38,7 @@ import java.util.Arrays;
 public class ReadFromSolrTableTestCase {
     private int inEventCount;
 
-    @Before
+    @BeforeClass
     public void init() {
         resetVariables();
     }
@@ -89,8 +89,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 3, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 3, inEvents.length);
+                    Assert.assertEquals(3, inEventCount);
+                    Assert.assertEquals(3, inEvents.length);
                 }
             }
 
@@ -140,8 +140,8 @@ public class ReadFromSolrTableTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    Assert.assertEquals("Number of Events", 1, inEvents.length);
-                    Assert.assertArrayEquals(new Object[]{"first1", "last2", 45}, inEvents[0].getData());
+                    Assert.assertEquals(1, inEvents.length);
+                    Assert.assertEquals(new Object[]{"first1", "last2", 45}, inEvents[0].getData());
                 }
             }
         });
@@ -198,8 +198,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEvents.length);
+                    Assert.assertEquals(2, inEventCount);
+                    Assert.assertEquals(2, inEvents.length);
                 }
             }
         });
@@ -251,8 +251,8 @@ public class ReadFromSolrTableTestCase {
                     if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
                         inEventCount++;
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEvents.length);
+                    Assert.assertEquals(1, inEventCount);
+                    Assert.assertEquals(1, inEvents.length);
                 }
             }
         });
@@ -304,8 +304,8 @@ public class ReadFromSolrTableTestCase {
                     if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
                         inEventCount++;
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEvents.length);
+                    Assert.assertEquals(1, inEventCount);
+                    Assert.assertEquals(1, inEvents.length);
                 }
             }
         });
@@ -357,8 +357,8 @@ public class ReadFromSolrTableTestCase {
                     if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
                         inEventCount++;
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 1, inEvents.length);
+                    Assert.assertEquals(1, inEventCount);
+                    Assert.assertEquals(1, inEvents.length);
                 }
             }
         });
@@ -415,8 +415,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEvents.length);
+                    Assert.assertEquals(2, inEventCount);
+                    Assert.assertEquals(2, inEvents.length);
 
                 }
             }
@@ -476,8 +476,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEventCount);
-                    Assert.assertEquals("Number of Events from Solr Table", 2, inEvents.length);
+                    Assert.assertEquals(2, inEventCount);
+                    Assert.assertEquals(2, inEvents.length);
 
                 }
             }

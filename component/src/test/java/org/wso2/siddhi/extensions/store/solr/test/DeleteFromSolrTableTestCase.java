@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
@@ -113,7 +113,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 0, getDocCount("*:*", "TEST34"));
+            Assert.assertEquals(0, getDocCount("*:*", "TEST34"), "Deletion failed");
 
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
@@ -156,7 +156,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 0, getDocCount("*:*", "TEST35"));
+            Assert.assertEquals(0, getDocCount("*:*", "TEST35"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest2' ignored due to " + e.getMessage(), e);
@@ -197,7 +197,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST36"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST36"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest3' ignored due to " + e.getMessage(), e);
@@ -237,7 +237,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST37"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST37"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest4' ignored due to " + e.getMessage(), e);
@@ -277,7 +277,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST38"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST38"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest5' ignored due to " + e.getMessage(), e);
@@ -318,7 +318,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST39"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST39"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest6' ignored due to " + e.getMessage(), e);
@@ -360,7 +360,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST40"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST40"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest7' ignored due to " + e.getMessage(), e);
@@ -401,7 +401,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 1, getDocCount("*:*", "TEST41"));
+            Assert.assertEquals(1, getDocCount("*:*", "TEST41"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest8' ignored due to " + e.getMessage(), e);
@@ -442,7 +442,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST42"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST42"), "Deletion failed");
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest10' ignored due to " + e.getMessage(), e);
@@ -482,7 +482,7 @@ public class DeleteFromSolrTableTestCase {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Deletion failed", 2, getDocCount("*:*", "TEST43"));
+            Assert.assertEquals(2, getDocCount("*:*", "TEST43"), "Deletion failed");
             Thread.sleep(1000);
 
             stockStream.send(new Object[]{null, 45.5F, 100L});

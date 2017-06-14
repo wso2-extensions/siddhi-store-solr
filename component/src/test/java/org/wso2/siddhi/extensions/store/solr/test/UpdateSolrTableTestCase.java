@@ -22,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -51,7 +51,7 @@ public class UpdateSolrTableTestCase {
     private static SolrClientServiceImpl indexerService;
 
 
-    @Before
+    @BeforeMethod
     public void init() {
         inEventCount = 0;
         removeEventCount = 0;
@@ -130,7 +130,7 @@ public class UpdateSolrTableTestCase {
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Update failed", 3, getDocCount("*:*", "TEST13"));
+            Assert.assertEquals(3, getDocCount("*:*", "TEST13"));
             executionPlanRuntime.shutdown();
 
         } catch (SolrClientServiceException | SolrServerException | IOException e) {
@@ -171,7 +171,7 @@ public class UpdateSolrTableTestCase {
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Update failed", 3, getDocCount("*:*", "TEST14"));
+            Assert.assertEquals(3, getDocCount("*:*", "TEST14"));
         } catch (Exception e) {
             log.error("Test case 'updateFromTableTest2' ignored due to " + e.getMessage(), e);
         }
@@ -223,8 +223,8 @@ public class UpdateSolrTableTestCase {
         checkStockStream.send(new Object[]{"WSO2", 100L});
         checkStockStream.send(new Object[]{"IBM", 100L});
         Thread.sleep(1000);
-        Assert.assertEquals("Number of success events", 3, inEventCount);
-        Assert.assertEquals("Event arrived", true, eventArrived);
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(true, eventArrived);
         executionPlanRuntime.shutdown();
     }
 
@@ -275,8 +275,8 @@ public class UpdateSolrTableTestCase {
         checkStockStream.send(new Object[]{"IBM", 100L});
         Thread.sleep(1000);
 
-        Assert.assertEquals("Number of success events", 3, inEventCount);
-        Assert.assertEquals("Event arrived", true, eventArrived);
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(true, eventArrived);
         executionPlanRuntime.shutdown();
     }
 
@@ -328,8 +328,8 @@ public class UpdateSolrTableTestCase {
         checkStockStream.send(new Object[]{"IBM", 100L});
         Thread.sleep(1000);
 
-        Assert.assertEquals("Number of success events", 2, inEventCount);
-        Assert.assertEquals("Event arrived", true, eventArrived);
+        Assert.assertEquals(2, inEventCount);
+        Assert.assertEquals(true, eventArrived);
         executionPlanRuntime.shutdown();
     }
 
@@ -380,8 +380,8 @@ public class UpdateSolrTableTestCase {
         checkStockStream.send(new Object[]{"IBM", 100L});
         Thread.sleep(1000);
 
-        Assert.assertEquals("Number of success events", 3, inEventCount);
-        Assert.assertEquals("Event arrived", true, eventArrived);
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(true, eventArrived);
         executionPlanRuntime.shutdown();
     }
 
@@ -425,10 +425,10 @@ public class UpdateSolrTableTestCase {
                         inEventCount++;
                         switch (inEventCount) {
                             case 1:
-                                Assert.assertArrayEquals(new Object[]{"IBM", 150.6f, 100L}, event.getData());
+                                Assert.assertEquals(new Object[]{"IBM", 150.6f, 100L}, event.getData());
                                 break;
                             case 2:
-                                Assert.assertArrayEquals(new Object[]{"IBM", 190.6f, 100L}, event.getData());
+                                Assert.assertEquals(new Object[]{"IBM", 190.6f, 100L}, event.getData());
                                 break;
                             default:
                                 Assert.assertSame(2, inEventCount);
@@ -458,9 +458,9 @@ public class UpdateSolrTableTestCase {
         checkStockStream.send(new Object[]{"WSO2", 155.6f, 100L});
         Thread.sleep(2000);
 
-        Assert.assertEquals("Number of success events", 2, inEventCount);
-        Assert.assertEquals("Number of remove events", 0, removeEventCount);
-        Assert.assertEquals("Event arrived", true, eventArrived);
+        Assert.assertEquals(2, inEventCount);
+        Assert.assertEquals(0, removeEventCount);
+        Assert.assertEquals(true, eventArrived);
         executionPlanRuntime.shutdown();
     }
 
@@ -497,7 +497,7 @@ public class UpdateSolrTableTestCase {
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Update failed", 3, getDocCount("*:*", "TEST20"));
+            Assert.assertEquals(3, getDocCount("*:*", "TEST20"));
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.error("Test case 'updateFromTableTest8' ignored due to " + e.getMessage(), e);
@@ -537,7 +537,7 @@ public class UpdateSolrTableTestCase {
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
             Thread.sleep(1000);
 
-            Assert.assertEquals("Update failed", 3, getDocCount("*:*", "TEST21"));
+            Assert.assertEquals(3, getDocCount("*:*", "TEST21"));
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateFromTableTest8' ignored due to " + e.getMessage(), e);

@@ -22,12 +22,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
@@ -46,7 +44,6 @@ import java.util.Map;
 /**
  * This class contains the unit tests for indexer service;
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CarbonIndexerServiceTestCase {
 
     private static final String TABLE_T1 = "T1";
@@ -57,6 +54,7 @@ public class CarbonIndexerServiceTestCase {
     public static void init() throws SolrClientServiceException {
         indexerService = SolrClientServiceImpl.getInstance();
     }
+
     @Test
     public void step1_testCreateIndexForTable() throws SolrClientServiceException {
         CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).shards(2)
@@ -65,19 +63,19 @@ public class CarbonIndexerServiceTestCase {
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step1_testCreateIndexForTable")
     public void step2_testCreateExistingIndex() throws SolrClientServiceException {
         CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).build();
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
         Assert.assertFalse(indexerService.createCollection(config));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step2_testCreateExistingIndex")
     public void step3_testIfInitialConfigsAreCopied() throws SolrClientServiceException {
         Assert.assertTrue(indexerService.collectionConfigExists(TABLE_T1));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step3_testIfInitialConfigsAreCopied")
     public void step4_testNonExistingIndexSchema() throws SolrClientServiceException {
         try {
             indexerService.getSolrSchema("T2");
@@ -86,13 +84,13 @@ public class CarbonIndexerServiceTestCase {
         }
     }
 
-    @Test
+    @Test(dependsOnMethods = "step4_testNonExistingIndexSchema")
     public void step5_testInitialIndexSchema() throws SolrClientServiceException, SolrSchemaNotFoundException {
         SolrSchema indexSchema = indexerService.getSolrSchema(TABLE_T1);
-        Assert.assertEquals(indexSchema.getUniqueKey(), "id");
+        Assert.assertEquals("id", indexSchema.getUniqueKey());
     }
 
-    @Test
+    @Test(dependsOnMethods = "step5_testInitialIndexSchema")
     public void step6_testUpdateIndexSchemaWithoutMerge()
             throws SolrSchemaNotFoundException, SolrClientServiceException {
         Map<String, SolrSchemaField> fieldMap = new HashMap<>();
@@ -135,15 +133,15 @@ public class CarbonIndexerServiceTestCase {
         SolrSchema indexSchema = new SolrSchema("id", fieldMap);
         Assert.assertTrue(indexerService.updateSolrSchema(TABLE_T1, indexSchema, false));
         SolrSchema indexSchema1 = indexerService.getSolrSchema(TABLE_T1);
-        Assert.assertEquals(indexSchema1.getField("IntField"), indexSchema.getField("IntField"));
-        Assert.assertEquals(indexSchema1.getField("LongField"), indexSchema.getField("LongField"));
-        Assert.assertEquals(indexSchema1.getField("DoubleField"), indexSchema.getField("DoubleField"));
-        Assert.assertEquals(indexSchema1.getField("FloatField"), indexSchema.getField("FloatField"));
-        Assert.assertEquals(indexSchema1.getField("BoolField"), indexSchema.getField("BoolField"));
-        Assert.assertEquals(indexSchema1.getField("_timestamp"), indexSchema.getField("_timestamp"));
+        Assert.assertEquals(indexSchema.getField("IntField"), indexSchema1.getField("IntField"));
+        Assert.assertEquals(indexSchema.getField("LongField"), indexSchema1.getField("LongField"));
+        Assert.assertEquals(indexSchema.getField("DoubleField"), indexSchema1.getField("DoubleField"));
+        Assert.assertEquals(indexSchema.getField("FloatField"), indexSchema1.getField("FloatField"));
+        Assert.assertEquals(indexSchema.getField("BoolField"), indexSchema1.getField("BoolField"));
+        Assert.assertEquals(indexSchema.getField("_timestamp"), indexSchema1.getField("_timestamp"));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step6_testUpdateIndexSchemaWithoutMerge")
     public void step7_testUpdateIndexSchemaWithMerge()
             throws SolrSchemaNotFoundException, SolrClientServiceException {
         SolrSchema oldIndexSchema = indexerService.getSolrSchema(TABLE_T1);
@@ -187,22 +185,22 @@ public class CarbonIndexerServiceTestCase {
         SolrSchema indexSchema = new SolrSchema("id", fieldMap);
         Assert.assertTrue(indexerService.updateSolrSchema(TABLE_T1, indexSchema, true));
         SolrSchema newIndexSchema = indexerService.getSolrSchema(TABLE_T1);
-        Assert.assertEquals(newIndexSchema.getField("IntField1"), indexSchema.getField("IntField1"));
-        Assert.assertEquals(newIndexSchema.getField("LongField1"), indexSchema.getField("LongField1"));
-        Assert.assertEquals(newIndexSchema.getField("DoubleField1"), indexSchema.getField("DoubleField1"));
-        Assert.assertEquals(newIndexSchema.getField("FloatField1"), indexSchema.getField("FloatField1"));
-        Assert.assertEquals(newIndexSchema.getField("BoolField1"), indexSchema.getField("BoolField1"));
-        Assert.assertEquals(newIndexSchema.getField("StringField1"), indexSchema.getField("StringField1"));
+        Assert.assertEquals(indexSchema.getField("IntField1"), newIndexSchema.getField("IntField1"));
+        Assert.assertEquals(indexSchema.getField("LongField1"), newIndexSchema.getField("LongField1"));
+        Assert.assertEquals(indexSchema.getField("DoubleField1"), newIndexSchema.getField("DoubleField1"));
+        Assert.assertEquals(indexSchema.getField("FloatField1"), newIndexSchema.getField("FloatField1"));
+        Assert.assertEquals(indexSchema.getField("BoolField1"), newIndexSchema.getField("BoolField1"));
+        Assert.assertEquals(indexSchema.getField("StringField1"), newIndexSchema.getField("StringField1"));
 
-        Assert.assertEquals(newIndexSchema.getField("IntField"), oldIndexSchema.getField("IntField"));
-        Assert.assertEquals(newIndexSchema.getField("LongField"), oldIndexSchema.getField("LongField"));
-        Assert.assertEquals(newIndexSchema.getField("DoubleField"), oldIndexSchema.getField("DoubleField"));
-        Assert.assertEquals(newIndexSchema.getField("FloatField"), oldIndexSchema.getField("FloatField"));
-        Assert.assertEquals(newIndexSchema.getField("BoolField"), oldIndexSchema.getField("BoolField"));
-        Assert.assertEquals(newIndexSchema.getField("_timestamp"), oldIndexSchema.getField("_timestamp"));
+        Assert.assertEquals(oldIndexSchema.getField("IntField"), newIndexSchema.getField("IntField"));
+        Assert.assertEquals(oldIndexSchema.getField("LongField"), newIndexSchema.getField("LongField"));
+        Assert.assertEquals(oldIndexSchema.getField("DoubleField"), newIndexSchema.getField("DoubleField"));
+        Assert.assertEquals(oldIndexSchema.getField("FloatField"), newIndexSchema.getField("FloatField"));
+        Assert.assertEquals(oldIndexSchema.getField("BoolField"), newIndexSchema.getField("BoolField"));
+        Assert.assertEquals(oldIndexSchema.getField("_timestamp"), newIndexSchema.getField("_timestamp"));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step7_testUpdateIndexSchemaWithMerge")
     public void step8_testIndexDocuments() throws SolrClientServiceException, IOException, SolrServerException {
         SiddhiSolrDocument doc1 = new SiddhiSolrDocument();
         doc1.addField("id", "1");
@@ -231,7 +229,7 @@ public class CarbonIndexerServiceTestCase {
 
         QueryResponse response = client.query(TABLE_T1, query);
         SolrDocumentList list = response.getResults();
-        Assert.assertEquals(list.size(), 1);
+        Assert.assertEquals(1, list.size());
         Assert.assertEquals(doc1.getFieldValue("id"), list.get(0).getFieldValue("id"));
         Assert.assertEquals(doc1.getFieldValue("DoubleField"), list.get(0).getFieldValue("DoubleField"));
 
@@ -239,11 +237,11 @@ public class CarbonIndexerServiceTestCase {
         query.setQuery("id:2");
         QueryResponse response1 = client.query(TABLE_T1, query);
         SolrDocumentList list1 = response1.getResults();
-        Assert.assertEquals(list1.size(), 1);
+        Assert.assertEquals(1, list1.size());
         Assert.assertEquals(doc2.getFieldValue("id"), list1.get(0).getFieldValue("id"));
     }
 
-    @Test
+    @Test(dependsOnMethods = "step8_testIndexDocuments")
     public void step9_testDeleteDocumentsByTimeRange()
             throws SolrClientServiceException, IOException, SolrServerException {
         String strQuery = "_timestamp:[0 TO " + System.currentTimeMillis() + "]";
@@ -256,7 +254,7 @@ public class CarbonIndexerServiceTestCase {
         Assert.assertTrue(list.isEmpty());
     }
 
-    @Test
+    @Test(dependsOnMethods = "step9_testDeleteDocumentsByTimeRange")
     public void stepA_testDeleteDocumentsByIds() throws SolrClientServiceException, IOException,
                                                   SolrServerException {
         List<String> ids = new ArrayList<>();
@@ -270,12 +268,12 @@ public class CarbonIndexerServiceTestCase {
         Assert.assertTrue(list.isEmpty());
     }
 
-    @Test
+    @Test(dependsOnMethods = "stepA_testDeleteDocumentsByIds")
     public void stepB_testDeleteIndexForTable() throws SolrClientServiceException {
         Assert.assertTrue(indexerService.deleteCollection(TABLE_T1));
     }
 
-    @Test
+    @Test(dependsOnMethods = "stepB_testDeleteIndexForTable")
     public void stepC_testDeleteNonExistingIndex() throws SolrClientServiceException {
         Assert.assertFalse(indexerService.deleteCollection(TABLE_T1));
     }

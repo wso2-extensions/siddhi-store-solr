@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.extensions.store.solr.test;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;

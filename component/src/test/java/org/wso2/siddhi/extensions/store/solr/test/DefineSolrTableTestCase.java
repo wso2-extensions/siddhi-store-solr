@@ -18,11 +18,9 @@
 
 package org.wso2.siddhi.extensions.store.solr.test;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
@@ -33,7 +31,7 @@ import org.wso2.siddhi.extensions.store.solr.impl.SolrClientServiceImpl;
 /**
  * This class contains the test cases related to SolrEventTable
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+
 public class DefineSolrTableTestCase {
 
     private static SolrClientServiceImpl indexerService;
