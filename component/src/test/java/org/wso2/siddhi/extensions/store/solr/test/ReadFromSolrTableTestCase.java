@@ -501,7 +501,7 @@ public class ReadFromSolrTableTestCase {
 
     @AfterClass
     public static void deleteTables() throws Exception {
-        SolrClientServiceImpl indexerService = SolrClientServiceImpl.getInstance();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         try {
             indexerService.deleteCollection("TEST4");
             indexerService.deleteCollection("TEST5");

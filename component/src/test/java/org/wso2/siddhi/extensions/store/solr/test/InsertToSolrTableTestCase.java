@@ -85,7 +85,7 @@ public class InsertToSolrTableTestCase {
 
     @AfterClass
     public static void deleteTables() throws Exception {
-        SolrClientServiceImpl indexerService = SolrClientServiceImpl.getInstance();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         if (indexerService == null) {
             throw new SolrClientServiceException("Indexer Service cannot be loaded!");
         }

@@ -111,7 +111,7 @@ public class SolrTable extends AbstractRecordTable {
     private static final Log log = LogFactory.getLog(SolrTable.class);
     private SolrClientServiceImpl solrClientService;
     private List<Attribute> attributes;
-    private String collection;
+    private CollectionConfiguration collectionConfig;
     private List<String> primaryKeys;
     private boolean commitAsync;
     private boolean mergeSchema;
@@ -132,7 +132,7 @@ public class SolrTable extends AbstractRecordTable {
             });
         }
         if (storeAnnotation != null) {
-            this.collection = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COLLECTION);
+            String collection = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COLLECTION);
             String url = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_URL);
             String shards = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SHARDS);
             String replicas = storeAnnotation.getElement(SolrTableConstants
@@ -143,8 +143,8 @@ public class SolrTable extends AbstractRecordTable {
             String mergeSchema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_MERGE_SCHEMA);
 
 
-            if (this.collection == null || this.collection.trim().isEmpty()) {
-                this.collection = tableDefinition.getId();
+            if (collection == null || collection.trim().isEmpty()) {
+                collection = tableDefinition.getId();
             }
             if (url == null || url.trim().isEmpty()) {
                 url = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_URL, SolrTableConstants
@@ -175,15 +175,15 @@ public class SolrTable extends AbstractRecordTable {
             this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants
                     .PROPERTY_READ_BATCH_SIZE, SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
             SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
-            CollectionConfiguration collectionConfig = new CollectionConfiguration.Builder().collectionName
-                    (this.collection).solrServerUrl(url).shards(Integer.parseInt(shards)).replicas(Integer.parseInt
+            collectionConfig = new CollectionConfiguration.Builder().collectionName
+                    (collection).solrServerUrl(url).shards(Integer.parseInt(shards)).replicas(Integer.parseInt
                     (replicas)).configs
                     (configSet).schema
                     (solrSchema).build();
-            solrClientService = SolrClientServiceImpl.getInstance();
+            solrClientService = SolrClientServiceImpl.INSTANCE;
             try {
-                solrClientService.createCollection(collectionConfig);
-                solrClientService.updateSolrSchema(this.collection, solrSchema, this.mergeSchema);
+                solrClientService.initCollection(collectionConfig);
+                solrClientService.updateSolrSchema(collectionConfig.getCollectionName(), solrSchema, this.mergeSchema);
             } catch (SolrClientServiceException e) {
                 log.error("Error while initializing the Solr Event table: " + e.getMessage(), e);
                 throw new ExecutionPlanCreationException("Error while initializing the Solr Event table: " + e
@@ -195,9 +195,10 @@ public class SolrTable extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) {
         List<SiddhiSolrDocument> siddhiSolrDocuments = SolrTableUtils.createSolrDocuments(attributes, primaryKeys,
-                                                                                        records);
+                records);
         try {
-            solrClientService.insertDocuments(collection, siddhiSolrDocuments, commitAsync);
+            solrClientService.insertDocuments(collectionConfig.getCollectionName(), siddhiSolrDocuments,
+                    commitAsync);
         } catch (SolrClientServiceException e) {
             throw new SolrTableException("Error while inserting records to Solr Event Table: " + e.getMessage(), e);
         }
@@ -213,8 +214,9 @@ public class SolrTable extends AbstractRecordTable {
             compiledCondition) {
         try {
             String condition = SolrTableUtils.resolveCondition((SolrCompiledCondition) compiledCondition,
-                                                               findConditionParameterMap, collection);
-            return new SolrRecordIterator(condition, solrClientService, collection, readBatchSize, attributes);
+                    findConditionParameterMap, collectionConfig.getCollectionName());
+            return new SolrRecordIterator(condition, solrClientService, collectionConfig, readBatchSize,
+                    attributes);
         } catch (SolrClientServiceException e) {
             throw new SolrTableException("Error while searching records in Solr Event Table: " + e.getMessage(), e);
         }
@@ -231,8 +233,8 @@ public class SolrTable extends AbstractRecordTable {
         try {
             for (Map<String, Object> deleteConditionParameterMap : deleteConditionParameterMaps) {
                 String condition = SolrTableUtils.resolveCondition((SolrCompiledCondition) compiledCondition,
-                                                                   deleteConditionParameterMap, collection);
-                solrClientService.deleteDocuments(collection, condition, commitAsync);
+                        deleteConditionParameterMap, collectionConfig.getCollectionName());
+                solrClientService.deleteDocuments(collectionConfig.getCollectionName(), condition, commitAsync);
             }
         } catch (SolrClientServiceException e) {
             throw new SolrTableException("Error while deleting documents from Solr Event Table: " + e.getMessage(), e);
@@ -284,9 +286,9 @@ public class SolrTable extends AbstractRecordTable {
             updateDocs.addAll(addDocs);
         }
         if (!deleteDocIds.isEmpty()) {
-            solrClientService.deleteDocuments(collection, deleteDocIds, false);
+            solrClientService.deleteDocuments(collectionConfig.getCollectionName(), deleteDocIds, false);
         }
-        solrClientService.insertDocuments(collection, updateDocs, commitAsync);
+        solrClientService.insertDocuments(collectionConfig.getCollectionName(), updateDocs, commitAsync);
     }
 
     private List<SiddhiSolrDocument> getNewSolrDocuments(List<Object[]> addingRecords, int index) {

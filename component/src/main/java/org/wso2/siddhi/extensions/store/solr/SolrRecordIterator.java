@@ -23,6 +23,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.wso2.siddhi.core.table.record.RecordIterator;
+import org.wso2.siddhi.extensions.store.solr.config.CollectionConfiguration;
 import org.wso2.siddhi.extensions.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.store.solr.exceptions.SolrIteratorException;
 import org.wso2.siddhi.extensions.store.solr.impl.SiddhiSolrClient;
@@ -49,13 +50,14 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
     private int start;
     private int count;
 
-    public SolrRecordIterator(String condition, SolrClientServiceImpl service, String collection, int batchSize,
+    public SolrRecordIterator(String condition, SolrClientServiceImpl service, CollectionConfiguration config, int
+            batchSize,
                               List<Attribute> attributes)
             throws SolrClientServiceException {
         this.batchSize = batchSize;
         this.attributes = attributes;
-        this.solrClient = service.getSolrServiceClient();
-        this.solrCollection = collection;
+        this.solrClient = service.getSolrServiceClientByURL(config.getSolrServerUrl());
+        this.solrCollection = config.getCollectionName();
         this.query = new SolrQuery(condition);
         this.start = 0;
         this.count = batchSize;

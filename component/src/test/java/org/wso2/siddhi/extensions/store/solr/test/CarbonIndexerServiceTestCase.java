@@ -52,22 +52,23 @@ public class CarbonIndexerServiceTestCase {
 
     @BeforeClass
     public static void init() throws SolrClientServiceException {
-        indexerService = SolrClientServiceImpl.getInstance();
+        indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
     @Test
     public void step1_testCreateIndexForTable() throws SolrClientServiceException {
         CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).shards(2)
                 .replicas(2).configs("gettingstarted").solrServerUrl("localhost:9983").build();
-        indexerService.createCollection(config);
+        indexerService.initCollection(config);
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
     }
 
     @Test(dependsOnMethods = "step1_testCreateIndexForTable")
     public void step2_testCreateExistingIndex() throws SolrClientServiceException {
-        CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).build();
+        CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).shards(2)
+                .replicas(2).configs("gettingstarted").solrServerUrl("localhost:9983").build();
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
-        Assert.assertFalse(indexerService.createCollection(config));
+        Assert.assertFalse(indexerService.initCollection(config));
     }
 
     @Test(dependsOnMethods = "step2_testCreateExistingIndex")
@@ -80,7 +81,7 @@ public class CarbonIndexerServiceTestCase {
         try {
             indexerService.getSolrSchema("T2");
         } catch (Exception e) {
-            Assert.assertTrue(e instanceof SolrSchemaNotFoundException);
+            Assert.assertTrue((e instanceof SolrSchemaNotFoundException) || e instanceof SolrClientServiceException);
         }
     }
 
@@ -223,7 +224,7 @@ public class CarbonIndexerServiceTestCase {
         docs.add(doc2);
         indexerService.insertDocuments(TABLE_T1, docs, false);
 
-        SiddhiSolrClient client = indexerService.getSolrServiceClient();
+        SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(TABLE_T1);
         SolrQuery query = new SolrQuery();
         query.setQuery("id:1");
 
@@ -246,7 +247,7 @@ public class CarbonIndexerServiceTestCase {
             throws SolrClientServiceException, IOException, SolrServerException {
         String strQuery = "_timestamp:[0 TO " + System.currentTimeMillis() + "]";
         indexerService.deleteDocuments(TABLE_T1, strQuery, false);
-        SiddhiSolrClient client = indexerService.getSolrServiceClient();
+        SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(TABLE_T1);
         SolrQuery query = new SolrQuery();
         query.setQuery(strQuery);
         QueryResponse response = client.query(TABLE_T1, query);
@@ -260,7 +261,7 @@ public class CarbonIndexerServiceTestCase {
         List<String> ids = new ArrayList<>();
         ids.add("2");
         indexerService.deleteDocuments(TABLE_T1, ids, false);
-        SiddhiSolrClient client = indexerService.getSolrServiceClient();
+        SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(TABLE_T1);
         SolrQuery query = new SolrQuery();
         query.setQuery("id:2");
         QueryResponse response = client.query(TABLE_T1, query);

@@ -61,7 +61,7 @@ public class UpdateSolrTableTestCase {
     @BeforeClass
     public static void startTest() {
         log.info("== Solr Table UPDATE tests started ==");
-        indexerService = SolrClientServiceImpl.getInstance();
+        indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
     @AfterClass
@@ -90,7 +90,7 @@ public class UpdateSolrTableTestCase {
 
     private long getDocCount(String query, String collection)
             throws SolrClientServiceException, IOException, SolrServerException {
-        SiddhiSolrClient client = indexerService.getSolrServiceClient();
+        SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(collection);
         SolrQuery solrQuery = new SolrQuery(query);
         solrQuery.setRows(0);
         long noOfDocs = client.query(collection, solrQuery).getResults().getNumFound();
@@ -576,7 +576,7 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
             Thread.sleep(1000);
-            SiddhiSolrClient client = indexerService.getSolrServiceClient();
+            SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection("TEST1");
             SolrQuery solrQuery = new SolrQuery("*:*");
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST11", solrQuery).getResults().getNumFound();
@@ -633,7 +633,7 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"IBM", 100.6f, 200L});
             updateStockStream.send(new Object[]{"IBM", 00.6f, 100L});
             Thread.sleep(1000);
-            SiddhiSolrClient client = indexerService.getSolrServiceClient();
+            SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection("TEST12");
             SolrQuery solrQuery = new SolrQuery("price:\"0.6\"");
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST12", solrQuery).getResults().getNumFound();

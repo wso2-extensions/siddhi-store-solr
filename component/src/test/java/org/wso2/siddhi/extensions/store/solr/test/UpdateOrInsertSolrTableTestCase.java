@@ -59,7 +59,7 @@ public class UpdateOrInsertSolrTableTestCase {
     @BeforeClass
     public static void startTest() {
         log.info("== Solr Table UPDATE/INSERT tests started ==");
-        indexerService = SolrClientServiceImpl.getInstance();
+        indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
     @AfterClass
@@ -874,7 +874,7 @@ public class UpdateOrInsertSolrTableTestCase {
     private long getDocCount(String query, String collection)
             throws SolrClientServiceException, IOException, SolrServerException {
         SiddhiSolrClient client;
-        client = indexerService.getSolrServiceClient();
+        client = indexerService.getSolrServiceClientByCollection(collection);
         SolrQuery solrQuery = new SolrQuery(query);
         solrQuery.setRows(0);
         return client.query(collection, solrQuery).getResults().getNumFound();

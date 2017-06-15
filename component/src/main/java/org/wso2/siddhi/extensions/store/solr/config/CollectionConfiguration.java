@@ -19,6 +19,7 @@
 package org.wso2.siddhi.extensions.store.solr.config;
 
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
+import org.wso2.siddhi.extensions.store.solr.utils.SolrTableUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -97,7 +98,8 @@ public class CollectionConfiguration {
         }
 
         public Builder solrServerUrl(String solrServerUrl) {
-            this.solrServerUrl = solrServerUrl;
+
+            this.solrServerUrl = SolrTableUtils.normalizeURL(solrServerUrl);
             return this;
         }
 

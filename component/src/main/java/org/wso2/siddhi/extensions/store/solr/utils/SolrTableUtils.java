@@ -32,8 +32,6 @@ import org.wso2.siddhi.extensions.store.solr.exceptions.SolrTableException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
@@ -61,22 +59,6 @@ public class SolrTableUtils {
             return new SecureRandom();
         }
     };
-
-    public static String getIndexerConfDirectory() throws SolrClientServiceException {
-        File confDir = null;
-        try {
-            confDir = new File(getConfDirectoryPath());
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error in getting the indexer config path: " + e.getMessage(), e);
-            }
-        }
-        if (confDir == null || !confDir.exists()) {
-            return getCustomIndexerConfDirectory();
-        } else {
-            return confDir.getAbsolutePath();
-        }
-    }
 
     public static String getConfDirectoryPath() {
         String carbonConfigDirPath = System.getProperty("carbon.config.dir.path");
@@ -111,19 +93,6 @@ public class SolrTableUtils {
             System.setProperty("analytics.home", baseDir);
         }
         return baseDir;
-    }
-
-    public static File getFileFromSystemResources(String fileName) throws URISyntaxException {
-        File file = null;
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        if (classLoader != null) {
-            URL url = classLoader.getResource(fileName);
-            if (url == null) {
-                url = classLoader.getResource(File.separator + fileName);
-            }
-            file = new File(url.toURI());
-        }
-        return file;
     }
 
     public static SolrSchema getMergedIndexSchema(SolrSchema oldSchema, SolrSchema newSchema) {
@@ -251,5 +220,13 @@ public class SolrTableUtils {
         secureRandom.get().nextBytes(data);
         ByteBuffer buff = ByteBuffer.wrap(data);
         return new UUID(buff.getLong(), buff.getLong()).toString();
+    }
+
+    public static String normalizeURL(String solrServerUrl) {
+        String serverUrl = solrServerUrl;
+        if (serverUrl.endsWith("/")) {
+            serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+        }
+        return serverUrl;
     }
 }

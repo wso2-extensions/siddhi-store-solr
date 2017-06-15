@@ -45,7 +45,7 @@ public class DefineSolrTableTestCase {
                 "define table Footable(time long, date string);";
 
         siddhiManager.createExecutionPlanRuntime(defineQuery);
-        indexerService = SolrClientServiceImpl.getInstance();
+        indexerService = SolrClientServiceImpl.INSTANCE;
         try {
             Assert.assertTrue(indexerService.collectionExists("TEST1"));
             SolrSchema schema = indexerService.getSolrSchema("TEST1");
