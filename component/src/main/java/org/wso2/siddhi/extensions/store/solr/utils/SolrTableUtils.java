@@ -27,14 +27,11 @@ import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocument;
 import org.wso2.siddhi.extensions.store.solr.beans.SiddhiSolrDocumentField;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchema;
 import org.wso2.siddhi.extensions.store.solr.beans.SolrSchemaField;
-import org.wso2.siddhi.extensions.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.siddhi.extensions.store.solr.exceptions.SolrTableException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,49 +48,12 @@ public class SolrTableUtils {
 
     private static Log log = LogFactory.getLog(SolrTableUtils.class);
 
-    public static final String CUSTOM_WSO2_CONF_DIR_NAME = "conf";
-    public static final String WSO2_ANALYTICS_INDEX_CONF_DIRECTORY_SYS_PROP = "wso2_custom_index_conf_dir";
     private static final String tenantDomain = "DEFAULT";
     private static ThreadLocal<SecureRandom> secureRandom = new ThreadLocal<SecureRandom>() {
         protected SecureRandom initialValue() {
             return new SecureRandom();
         }
     };
-
-    public static String getConfDirectoryPath() {
-        String carbonConfigDirPath = System.getProperty("carbon.config.dir.path");
-        if (carbonConfigDirPath == null) {
-            carbonConfigDirPath = System.getenv("CARBON_CONFIG_DIR_PATH");
-            if (carbonConfigDirPath == null) {
-                return getBaseDirectoryPath() + File.separator + "conf";
-            }
-        }
-        return carbonConfigDirPath;
-    }
-
-    private static String getCustomIndexerConfDirectory() throws SolrClientServiceException {
-        String path = System.getProperty(WSO2_ANALYTICS_INDEX_CONF_DIRECTORY_SYS_PROP);
-        if (path == null) {
-            path = Paths.get("").toAbsolutePath().toString() + File.separator + CUSTOM_WSO2_CONF_DIR_NAME;
-        }
-        File confDir = new File(path);
-        if (!confDir.exists()) {
-            throw new SolrClientServiceException("The custom WSO2 index configuration directory does not exist at '"
-                    + path + "'. "
-                    + "This can be given by correctly pointing to a valid configuration directory by setting the "
-                    + "Java system property '" + WSO2_ANALYTICS_INDEX_CONF_DIRECTORY_SYS_PROP + "'.");
-        }
-        return confDir.getAbsolutePath();
-    }
-
-    public static String getBaseDirectoryPath() {
-        String baseDir = System.getProperty("analytics.home");
-        if (baseDir == null) {
-            baseDir = System.getenv("ANALYTICS_HOME");
-            System.setProperty("analytics.home", baseDir);
-        }
-        return baseDir;
-    }
 
     public static SolrSchema getMergedIndexSchema(SolrSchema oldSchema, SolrSchema newSchema) {
         SolrSchema mergedSchema = new SolrSchema();
