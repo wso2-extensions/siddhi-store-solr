@@ -86,7 +86,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.apache.solr.*,
-                            org.wso2.siddhi.extensions.store.solr.*
+                            org.wso2.extensions.siddhi.store.solr.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
