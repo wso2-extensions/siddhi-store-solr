@@ -22,7 +22,7 @@
 <suite name="Solr-Event-Table-Test-Suite">
     <test name="solr-tests" preserve-order="true" parallel="false">
         <packages>
-            <!--<package name="org.wso2.extensions.siddhi.store.solr.test"/>-->
+            <!--<package name="org.wso2.extension.siddhi.store.solr.test"/>-->
         </packages>
     </test>
 </suite>
