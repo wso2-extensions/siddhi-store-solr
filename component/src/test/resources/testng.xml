@@ -21,14 +21,8 @@
 
 <suite name="Solr-Event-Table-Test-Suite">
     <test name="solr-tests" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.CarbonIndexerServiceTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.DefineSolrTableTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.InsertToSolrTableTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.ReadFromSolrTableTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.UpdateOrInsertSolrTableTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.UpdateSolrTableTestCase"/>
-            <class name="org.wso2.extensions.siddhi.store.solr.test.DeleteFromSolrTableTestCase"/>
-        </classes>
+        <packages>
+            <!--<package name="org.wso2.extensions.siddhi.store.solr.test"/>-->
+        </packages>
     </test>
 </suite>
