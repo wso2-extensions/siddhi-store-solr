@@ -86,7 +86,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.apache.solr.*,
-                            org.wso2.extensions.siddhi.store.solr.*
+                            org.wso2.extension.siddhi.store.solr.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
@@ -110,9 +110,4 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
-        <mavan.checkstyle.suppression.file>../checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
-    </properties>
-
 </project>
