@@ -33,11 +33,12 @@ public class SolrTableConstants {
     public static final String ANNOTATION_ELEMENT_MERGE_SCHEMA = "merge.schema";
 
     public static final String PROPERTY_READ_BATCH_SIZE = "read.batch.size";
+    public static final String PROPERTY_UPDATE_BATCH_SIZE = "update.batch.size";
 
     public static final String DEFAULT_ZOOKEEPER_URL = "localhost:9983";
     public static final String DEFAULT_SHARD_COUNT = "2";
     public static final String DEFAULT_REPLICAS_COUNT = "1";
     public static final String DEFAULT_READ_ITERATOR_BATCH_SIZE = "1000";
+    public static final String DEFAULT_UPDATE_BATCH_SIZE = "1000";
     public static final String DEFAULT_SOLR_BASE_CONFIG_NAME = "gettingstarted";
-
 }

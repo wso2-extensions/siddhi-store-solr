@@ -22,7 +22,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -71,9 +71,9 @@ public class ReadFromSolrTableTestCase {
                            "age  " +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -95,17 +95,17 @@ public class ReadFromSolrTableTestCase {
             }
 
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -133,9 +133,9 @@ public class ReadFromSolrTableTestCase {
                            "age having fooname == 'last2'" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -145,17 +145,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -183,9 +183,9 @@ public class ReadFromSolrTableTestCase {
                            "age having age > 23" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -203,17 +203,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -241,9 +241,9 @@ public class ReadFromSolrTableTestCase {
                            "age having age > 23 and fooname == 'last2'" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -256,17 +256,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -294,9 +294,9 @@ public class ReadFromSolrTableTestCase {
                            "age having age == 45 and fooname == 'last2' and booname == 'first1'" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -309,17 +309,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -347,9 +347,9 @@ public class ReadFromSolrTableTestCase {
                            "age having age == 45 and fooname == 'last2' and booname == 'first1'" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -362,17 +362,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -400,9 +400,9 @@ public class ReadFromSolrTableTestCase {
                            "age having (age == 45 and fooname == 'last2') or age == 100" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -421,17 +421,17 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -461,9 +461,9 @@ public class ReadFromSolrTableTestCase {
                            "((age == 56 or fooname == 'last1') and (school == 'school2' or index == 1006))" +
                            "insert into OutputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -482,10 +482,10 @@ public class ReadFromSolrTableTestCase {
                 }
             }
         });
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        InputHandler booStream = executionPlanRuntime.getInputHandler("BooStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23, "school1", 1001});
             fooStream.send(new Object[]{"first2", "last2", 45, "school2", 1002});
             fooStream.send(new Object[]{"first3", "last3", 100, "school3", 1003});
@@ -495,7 +495,7 @@ public class ReadFromSolrTableTestCase {
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 

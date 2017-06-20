@@ -18,12 +18,12 @@
 
 package org.wso2.siddhi.extensions.store.solr.exceptions;
 
-import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 
 /**
  * This class represents any exception occurring at {@link org.wso2.siddhi.extensions.store.solr.SolrTable} level
  */
-public class SolrTableException extends ExecutionPlanRuntimeException {
+public class SolrTableException extends SiddhiAppRuntimeException {
 
     public SolrTableException(String message) {
         super(message);

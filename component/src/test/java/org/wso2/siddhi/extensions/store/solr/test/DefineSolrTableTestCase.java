@@ -44,7 +44,7 @@ public class DefineSolrTableTestCase {
                 "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
-        siddhiManager.createExecutionPlanRuntime(defineQuery);
+        siddhiManager.createSiddhiAppRuntime(defineQuery);
         indexerService = SolrClientServiceImpl.INSTANCE;
         try {
             Assert.assertTrue(indexerService.collectionExists("TEST1"));

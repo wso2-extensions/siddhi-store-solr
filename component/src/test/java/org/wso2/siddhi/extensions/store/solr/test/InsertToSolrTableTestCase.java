@@ -20,7 +20,7 @@ package org.wso2.siddhi.extensions.store.solr.test;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extensions.store.solr.exceptions.SolrClientServiceException;
@@ -43,15 +43,15 @@ public class InsertToSolrTableTestCase {
                              "from FooStream   " +
                              "insert into FooTable ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery + insertQuery);
-        InputHandler fooTable = executionPlanRuntime.getInputHandler("FooStream");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
+        InputHandler fooTable = siddhiAppRuntime.getInputHandler("FooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooTable.send(new Object[]{45324211L, "1970-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MIN_VALUE, "2016-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MAX_VALUE, "2005-03-01 23:34:34 456"});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 
@@ -71,15 +71,15 @@ public class InsertToSolrTableTestCase {
                              "select firstname as recordId, lastname, age " +
                              "insert into FooTable ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(defineQuery + insertQuery);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         try {
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first1", "last1", 100});
         } finally {
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         }
     }
 

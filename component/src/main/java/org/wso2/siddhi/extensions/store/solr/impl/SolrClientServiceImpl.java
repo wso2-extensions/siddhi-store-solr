@@ -63,12 +63,15 @@ public enum  SolrClientServiceImpl {
 
     public SiddhiSolrClient getSolrServiceClientByCollection(String collection) throws SolrClientServiceException {
         String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(collection);
-        CollectionConfiguration config = tableToConfigMapping.get(tableNameWithTenant);
-        if (config == null) {
-            throw new SolrClientServiceException("No configset found for collection: " + collection);
+        synchronized (this) {
+            CollectionConfiguration config = tableToConfigMapping.get(tableNameWithTenant);
+            if (config == null) {
+                throw new SolrClientServiceException("No Solr collection definition found for collection: " +
+                                                     collection);
+            }
+            String solrServerURL = config.getSolrServerUrl();
+            return getSolrServiceClientByURL(solrServerURL);
         }
-        String solrServerURL = config.getSolrServerUrl();
-        return getSolrServiceClientByURL(solrServerURL);
     }
 
     public SiddhiSolrClient getSolrServiceClientByURL(String url) throws SolrClientServiceException {
@@ -111,14 +114,16 @@ public enum  SolrClientServiceImpl {
 
     private void initSolrClientForTable(CollectionConfiguration config) throws SolrClientServiceException {
         String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(config.getCollectionName());
-        tableToConfigMapping.put(tableNameWithTenant, config);
-        String serverURL = config.getSolrServerUrl();
-        if (serverURL == null || serverURL.isEmpty()) {
-            throw new SolrClientServiceException("Solr server URL for collection: " + config.getCollectionName() +
-                    " cannot be empty or null");
+        synchronized (this) {
+            tableToConfigMapping.put(tableNameWithTenant, config);
+            String serverURL = config.getSolrServerUrl();
+            if (serverURL == null || serverURL.isEmpty()) {
+                throw new SolrClientServiceException("Solr server URL for collection: " + config.getCollectionName() +
+                                                     " cannot be empty or null");
+            }
+            SolrClient solrClient = new CloudSolrClient.Builder().withZkHost(config.getSolrServerUrl()).build();
+            urlToSolrClientMapping.put(config.getSolrServerUrl(), new SiddhiSolrClient(solrClient));
         }
-        SolrClient solrClient = new CloudSolrClient.Builder().withZkHost(config.getSolrServerUrl()).build();
-        urlToSolrClientMapping.put(config.getSolrServerUrl(), new SiddhiSolrClient(solrClient));
     }
 
     /*

@@ -26,7 +26,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -108,10 +108,10 @@ public class UpdateOrInsertSolrTableTestCase {
                            "update or insert into StockTable " +
                            "   on StockTable.symbol=='IBM' ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -119,7 +119,7 @@ public class UpdateOrInsertSolrTableTestCase {
             updateStockStream.send(new Object[]{"GOOG", 10.6F, 100L});
             Thread.sleep(500);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest1' ignored due to " + e.getMessage(), e);
             throw e;
@@ -143,9 +143,9 @@ public class UpdateOrInsertSolrTableTestCase {
                            "update or insert into StockTable " +
                            "   on StockTable.symbol==symbol ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -153,7 +153,7 @@ public class UpdateOrInsertSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 10F, 100L});
             Thread.sleep(500);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest2' ignored due to " + e.getMessage(), e);
             throw e;
@@ -188,8 +188,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -220,10 +220,10 @@ public class UpdateOrInsertSolrTableTestCase {
 
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 55.6F, 100L});
@@ -237,7 +237,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(3, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest3' ignored due to " + e.getMessage(), e);
             throw e;
@@ -267,8 +267,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -298,9 +298,9 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 55.6F, 100L});
@@ -314,7 +314,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(3, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest4' ignored due to " + e.getMessage(), e);
             throw e;
@@ -346,9 +346,9 @@ public class UpdateOrInsertSolrTableTestCase {
                            "update or insert into StockTable " +
                            "   on StockTable.symbol==symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
 
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -356,10 +356,10 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 55.6F, 100L});
@@ -373,7 +373,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(0, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(false, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest5' ignored due to " + e.getMessage(), e);
             throw e;
@@ -411,8 +411,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -442,10 +442,10 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 55.6F, 100L});
@@ -460,7 +460,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(3, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest5' ignored due to " + e.getMessage(), e);
             throw e;
@@ -497,8 +497,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "< StockTable.price) in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -525,10 +525,10 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 155.6F, 100L});
@@ -542,7 +542,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(2, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest7' ignored due to " + e.getMessage(), e);
             throw e;
@@ -573,8 +573,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "< StockTable.price) in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -601,9 +601,9 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 155.6F, 100L});
@@ -617,7 +617,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(2, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest8' ignored due to " + e.getMessage(), e);
             throw e;
@@ -655,8 +655,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "CheckStockStream.price < StockTable.price) in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -683,10 +683,10 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 155.6F, 100L});
@@ -700,7 +700,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(2, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest9' ignored due to " + e.getMessage(), e);
@@ -738,8 +738,8 @@ public class UpdateOrInsertSolrTableTestCase {
                            "price < StockTable.price) in StockTable] " +
                            "insert into OutStream;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -766,10 +766,10 @@ public class UpdateOrInsertSolrTableTestCase {
                 }
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             checkStockStream.send(new Object[]{"IBM", 100L, 155.6f});
@@ -783,7 +783,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Assert.assertEquals(2, inEventCount);
             Assert.assertEquals(0, removeEventCount);
             Assert.assertEquals(true, eventArrived);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest10' ignored due to " + e.getMessage(), e);
             throw e;
@@ -812,10 +812,10 @@ public class UpdateOrInsertSolrTableTestCase {
                            "update or insert into StockTable " +
                            "   on StockTable.volume==volume ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -825,7 +825,7 @@ public class UpdateOrInsertSolrTableTestCase {
 
             long docCount = getDocCount("*:*", "TEST32");
             Assert.assertEquals(3, docCount);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'insertOverwriteTableTest11' ignored due to " + e.getMessage(), e);
         }
@@ -853,10 +853,10 @@ public class UpdateOrInsertSolrTableTestCase {
                            "update or insert into StockTable " +
                            "   on StockTable.volume == volume ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -865,7 +865,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Thread.sleep(500);
 
             Assert.assertEquals(4, getDocCount("*:*", "TEST33"));
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'insertOverwriteTableTest12' ignored due to " + e.getMessage(), e);
         }
