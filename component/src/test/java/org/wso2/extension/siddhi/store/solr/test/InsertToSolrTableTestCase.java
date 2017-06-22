@@ -83,6 +83,34 @@ public class InsertToSolrTableTestCase {
         }
     }
 
+    @Test
+    public void insertEventsToSolrEventTableWithPrimaryKeys2() throws InterruptedException {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "define stream FooStream (firstname string, lastname string, age int);" +
+                "@PrimaryKey('someOtherfield','anotherField')" +
+                "@store(type='solr', url='localhost:9983', collection='TEST3', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema='recordId string stored, lastname string stored, age int stored', " +
+                "commit.async='true')" +
+                "define table FooTable(recordId string, lastname string, age int);";
+        String insertQuery = "" +
+                             "@info(name = 'query1') " +
+                             "from FooStream   " +
+                             "select firstname as recordId, lastname, age " +
+                             "insert into FooTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        try {
+            siddhiAppRuntime.start();
+            fooStream.send(new Object[]{"first1", "last1", 23});
+            fooStream.send(new Object[]{"first2", "last2", 45});
+            fooStream.send(new Object[]{"first1", "last1", 100});
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
     @AfterClass
     public static void deleteTables() throws Exception {
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
