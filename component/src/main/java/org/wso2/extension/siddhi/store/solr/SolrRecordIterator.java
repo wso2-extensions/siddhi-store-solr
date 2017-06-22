@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.wso2.extension.siddhi.store.solr.config.CollectionConfiguration;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrIteratorException;
@@ -51,9 +52,7 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
     private int count;
 
     public SolrRecordIterator(String condition, SolrClientServiceImpl service, CollectionConfiguration config, int
-            batchSize,
-                              List<Attribute> attributes)
-            throws SolrClientServiceException {
+            batchSize, List<Attribute> attributes) throws SolrClientServiceException {
         this.batchSize = batchSize;
         this.attributes = attributes;
         this.solrClient = service.getSolrServiceClientByURL(config.getSolrServerUrl());
@@ -95,7 +94,7 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
                     solrDocumentIterator = solrDocuments.iterator();
                     return hasNext();
                 }
-            } catch (SolrServerException | IOException e) {
+            } catch (SolrServerException | IOException | SolrException e) {
                 throw new SolrIteratorException("Error while calling hasNext(): " + e.getMessage(), e);
             }
         }
