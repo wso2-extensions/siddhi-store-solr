@@ -34,6 +34,7 @@ public class SolrTableConstants {
 
     public static final String PROPERTY_READ_BATCH_SIZE = "read.batch.size";
     public static final String PROPERTY_UPDATE_BATCH_SIZE = "update.batch.size";
+    public static final String PROPERTY_DOMAIN_IDENTIFIER = "solr.domain.identifier";
 
     public static final String DEFAULT_ZOOKEEPER_URL = "localhost:9983";
     public static final String DEFAULT_SHARD_COUNT = "2";
@@ -41,4 +42,6 @@ public class SolrTableConstants {
     public static final String DEFAULT_READ_ITERATOR_BATCH_SIZE = "1000";
     public static final String DEFAULT_UPDATE_BATCH_SIZE = "1000";
     public static final String DEFAULT_SOLR_BASE_CONFIG_NAME = "gettingstarted";
+    public static final String DEFAULT_PROPERTY_DOMAIN_IDENTIFIER = "DEFAULT";
+
 }

@@ -21,55 +21,46 @@ package org.wso2.extension.siddhi.store.solr.config;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchema;
 import org.wso2.extension.siddhi.store.solr.utils.SolrTableUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represents the Indexing Server details to connect.
  */
-@XmlRootElement(name = "indexer-config")
 public class CollectionConfiguration {
-    private static final String DEFAULT_SOLR_URL = "localhost:9983";
-    private static final String BASE_CONFIG_SET = "gettingstarted";
-    private static final String DEFAULT_NO_OF_SHARDS = "2";
-    private static final String DEFAULT_NO_OF_REPLICA = "1";
     private String solrServerUrl;
     private String collectionName;
     private int noOfShards;
     private int noOfReplicas;
     private String configSet;
     private SolrSchema schema;
+    private String domainName;
 
     private CollectionConfiguration() {
 
     }
 
     private CollectionConfiguration(String collectionName, String solrServerUrl, int noOfShards, int noOfReplicas,
-                                    SolrSchema schema, String configSet) {
+                                    SolrSchema schema, String configSet, String domainName) {
         this.noOfShards = noOfShards;
         this.noOfReplicas = noOfReplicas;
         this.solrServerUrl = solrServerUrl;
         this.configSet = configSet;
         this.collectionName = collectionName;
         this.schema = schema;
+        this.domainName = domainName;
     }
 
-    @XmlElement(name = "solr-cloud-url", defaultValue = DEFAULT_SOLR_URL)
     public String getSolrServerUrl() {
         return solrServerUrl;
     }
 
-    @XmlElement(name = "no-of-shards", defaultValue = DEFAULT_NO_OF_SHARDS)
     public int getNoOfShards() {
         return noOfShards;
     }
 
-    @XmlElement(name = "no-of-replica", defaultValue = DEFAULT_NO_OF_REPLICA)
     public int getNoOfReplicas() {
         return noOfReplicas;
     }
 
-    @XmlElement(name = "default-config-set", defaultValue = BASE_CONFIG_SET)
     public String getConfigSet() {
         return configSet;
     }
@@ -82,6 +73,10 @@ public class CollectionConfiguration {
         return schema;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+
     /**
      * Builder class for creating the CollectionConfiguration objects.
      */
@@ -92,6 +87,7 @@ public class CollectionConfiguration {
         private int noOfReplicas;
         private String configSet;
         private SolrSchema schema;
+        private String domainName;
 
         public Builder() {
 
@@ -118,7 +114,7 @@ public class CollectionConfiguration {
             return this;
         }
 
-        public Builder configs(String configSet) {
+        public Builder configSet(String configSet) {
             this.configSet = configSet;
             return this;
         }
@@ -128,9 +124,14 @@ public class CollectionConfiguration {
             return this;
         }
 
+        public Builder domainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
+
         public CollectionConfiguration build() {
             return new CollectionConfiguration(collectionName, solrServerUrl, noOfShards, noOfReplicas, schema,
-                                               configSet);
+                                               configSet, domainName);
         }
     }
 }

@@ -45,14 +45,16 @@ public class SiddhiSolrClient extends SolrClient {
 
     private static final long serialVersionUID = -6070746447077156187L;
     private SolrClient solrClient;
+    private String domain;
 
-    public SiddhiSolrClient(SolrClient solrClient) {
+    public SiddhiSolrClient(String domain, SolrClient solrClient) {
         this.solrClient = solrClient;
+        this.domain = domain;
     }
 
     public UpdateResponse add(String collection, Collection<SolrInputDocument> docs)
             throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docs);
+        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), docs);
     }
 
     public UpdateResponse add(Collection<SolrInputDocument> docs) throws SolrServerException, IOException {
@@ -61,7 +63,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse add(String collection, Collection<SolrInputDocument> docs, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docs, commitWithinMs);
+        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), docs, commitWithinMs);
     }
 
     public UpdateResponse add(Collection<SolrInputDocument> docs, int commitWithinMs)
@@ -70,7 +72,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse add(String collection, SolrInputDocument doc) throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), doc);
+        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), doc);
     }
 
     public UpdateResponse add(SolrInputDocument doc) throws SolrServerException, IOException {
@@ -79,7 +81,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse add(String collection, SolrInputDocument doc, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), doc, commitWithinMs);
+        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), doc, commitWithinMs);
     }
 
     public UpdateResponse add(SolrInputDocument doc, int commitWithinMs) throws SolrServerException, IOException {
@@ -88,7 +90,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse add(String collection, Iterator<SolrInputDocument> docIterator)
             throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docIterator);
+        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), docIterator);
     }
 
     public UpdateResponse add(Iterator<SolrInputDocument> docIterator)
@@ -97,7 +99,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse addBean(String collection, Object obj) throws IOException, SolrServerException {
-        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(collection), obj);
+        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), obj);
     }
 
     public UpdateResponse addBean(Object obj) throws IOException, SolrServerException {
@@ -106,7 +108,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse addBean(String collection, Object obj, int commitWithinMs)
             throws IOException, SolrServerException {
-        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(collection), obj, commitWithinMs);
+        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), obj,
+                commitWithinMs);
     }
 
     public UpdateResponse addBean(Object obj, int commitWithinMs) throws IOException, SolrServerException {
@@ -114,7 +117,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse addBeans(String collection, Collection<?> beans) throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beans);
+        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), beans);
     }
 
     public UpdateResponse addBeans(Collection<?> beans) throws SolrServerException, IOException {
@@ -123,7 +126,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse addBeans(String collection, Collection<?> beans, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beans, commitWithinMs);
+        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), beans,
+                commitWithinMs);
     }
 
     public UpdateResponse addBeans(Collection<?> beans, int commitWithinMs) throws SolrServerException, IOException {
@@ -132,7 +136,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse addBeans(String collection, final Iterator<?> beanIterator)
             throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beanIterator);
+        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), beanIterator);
     }
 
     public UpdateResponse addBeans(Iterator<?> beanIterator) throws SolrServerException, IOException {
@@ -140,7 +144,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse commit(String collection) throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection));
+        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(domain, collection));
     }
 
     public UpdateResponse commit() throws SolrServerException, IOException {
@@ -149,7 +153,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse commit(String collection, boolean waitFlush, boolean waitSearcher)
             throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher);
+        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), waitFlush,
+                waitSearcher);
     }
 
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
@@ -158,8 +163,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse commit(String collection, boolean waitFlush, boolean waitSearcher, boolean softCommit)
             throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher,
-                                 softCommit);
+        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), waitFlush,
+                waitSearcher, softCommit);
     }
 
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher, boolean softCommit)
@@ -168,7 +173,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse optimize(String collection) throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection));
+        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(domain, collection));
     }
 
     public UpdateResponse optimize() throws SolrServerException, IOException {
@@ -177,7 +182,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse optimize(String collection, boolean waitFlush, boolean waitSearcher)
             throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher);
+        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), waitFlush,
+                waitSearcher);
     }
 
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
@@ -186,8 +192,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse optimize(String collection, boolean waitFlush, boolean waitSearcher, int maxSegments)
             throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher,
-                                   maxSegments);
+        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), waitFlush,
+                waitSearcher, maxSegments);
     }
 
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, int maxSegments)
@@ -196,7 +202,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse rollback(String collection) throws SolrServerException, IOException {
-        return solrClient.rollback(SolrTableUtils.getCollectionNameWithDomainName(collection));
+        return solrClient.rollback(SolrTableUtils.getCollectionNameWithDomainName(domain, collection));
     }
 
     public UpdateResponse rollback() throws SolrServerException, IOException {
@@ -204,7 +210,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse deleteById(String collection, String id) throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), id);
+        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), id);
     }
 
     public UpdateResponse deleteById(String id) throws SolrServerException, IOException {
@@ -213,7 +219,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse deleteById(String collection, String id, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), id, commitWithinMs);
+        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), id,
+                commitWithinMs);
     }
 
     public UpdateResponse deleteById(String id, int commitWithinMs) throws SolrServerException, IOException {
@@ -221,7 +228,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse deleteById(String collection, List<String> ids) throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids);
+        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), ids);
     }
 
     public UpdateResponse deleteById(List<String> ids) throws SolrServerException, IOException {
@@ -230,7 +237,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse deleteById(String collection, List<String> ids, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids, commitWithinMs);
+        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), ids,
+                commitWithinMs);
     }
 
     public UpdateResponse deleteById(List<String> ids, int commitWithinMs) throws SolrServerException, IOException {
@@ -238,7 +246,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public UpdateResponse deleteByQuery(String collection, String query) throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(collection), query);
+        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), query);
     }
 
     public UpdateResponse deleteByQuery(String query) throws SolrServerException, IOException {
@@ -247,8 +255,8 @@ public class SiddhiSolrClient extends SolrClient {
 
     public UpdateResponse deleteByQuery(String collection, String query, int commitWithinMs)
             throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(collection), query,
-                                        commitWithinMs);
+        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), query,
+                commitWithinMs);
     }
 
     public UpdateResponse deleteByQuery(String query, int commitWithinMs) throws SolrServerException, IOException {
@@ -260,7 +268,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public QueryResponse query(String collection, SolrParams params) throws SolrServerException, IOException {
-        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(collection), params);
+        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), params);
     }
 
     public QueryResponse query(SolrParams params) throws SolrServerException, IOException {
@@ -269,7 +277,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public QueryResponse query(String collection, SolrParams params, SolrRequest.METHOD method)
             throws SolrServerException, IOException {
-        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(collection), params, method);
+        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), params, method);
     }
 
     public QueryResponse query(SolrParams params, SolrRequest.METHOD method) throws SolrServerException, IOException {
@@ -279,8 +287,8 @@ public class SiddhiSolrClient extends SolrClient {
     public QueryResponse queryAndStreamResponse(String collection, SolrParams params,
                                                 StreamingResponseCallback callback)
             throws SolrServerException, IOException {
-        return solrClient.queryAndStreamResponse(SolrTableUtils.getCollectionNameWithDomainName(collection), params,
-                                                 callback);
+        return solrClient.queryAndStreamResponse(SolrTableUtils.getCollectionNameWithDomainName(domain, collection),
+                params, callback);
     }
 
     public QueryResponse queryAndStreamResponse(SolrParams params, StreamingResponseCallback callback)
@@ -289,7 +297,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public SolrDocument getById(String collection, String id) throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), id);
+        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), id);
     }
 
     public SolrDocument getById(String id) throws SolrServerException, IOException {
@@ -298,7 +306,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public SolrDocument getById(String collection, String id, SolrParams params)
             throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), id, params);
+        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), id, params);
     }
 
     public SolrDocument getById(String id, SolrParams params) throws SolrServerException, IOException {
@@ -306,7 +314,7 @@ public class SiddhiSolrClient extends SolrClient {
     }
 
     public SolrDocumentList getById(String collection, Collection<String> ids) throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids);
+        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), ids);
     }
 
     public SolrDocumentList getById(Collection<String> ids) throws SolrServerException, IOException {
@@ -315,7 +323,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     public SolrDocumentList getById(String collection, Collection<String> ids, SolrParams params)
             throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids, params);
+        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(domain, collection), ids, params);
     }
 
     public SolrDocumentList getById(Collection<String> ids, SolrParams params) throws SolrServerException, IOException {
@@ -324,302 +332,7 @@ public class SiddhiSolrClient extends SolrClient {
 
     @Override
     public NamedList<Object> request(SolrRequest request, String collection) throws SolrServerException, IOException {
-        return solrClient.request(request, SolrTableUtils.getCollectionNameWithDomainName(collection));
-    }
-
-    public UpdateResponse add(String collection, Collection<SolrInputDocument> docs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docs);
-    }
-
-    public UpdateResponse add(Collection<SolrInputDocument> docs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(docs);
-    }
-
-    public UpdateResponse add(String collection, Collection<SolrInputDocument> docs, int commitWithinMs,
-                              String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docs, commitWithinMs);
-    }
-
-    public UpdateResponse add(Collection<SolrInputDocument> docs, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(docs, commitWithinMs);
-    }
-
-    public UpdateResponse add(String collection, SolrInputDocument doc, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), doc);
-    }
-
-    public UpdateResponse add(SolrInputDocument doc, String username) throws SolrServerException, IOException {
-        return solrClient.add(doc);
-    }
-
-    public UpdateResponse add(String collection, SolrInputDocument doc, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), doc, commitWithinMs);
-    }
-
-    public UpdateResponse add(SolrInputDocument doc, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(doc, commitWithinMs);
-    }
-
-    public UpdateResponse add(String collection, Iterator<SolrInputDocument> docIterator, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(SolrTableUtils.getCollectionNameWithDomainName(collection), docIterator);
-    }
-
-    public UpdateResponse add(Iterator<SolrInputDocument> docIterator, String username)
-            throws SolrServerException, IOException {
-        return solrClient.add(docIterator);
-    }
-
-    public UpdateResponse addBean(String collection, Object obj, String username)
-            throws IOException, SolrServerException {
-        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(collection), obj);
-    }
-
-    public UpdateResponse addBean(Object obj, String username) throws IOException, SolrServerException {
-        return solrClient.addBean(obj);
-    }
-
-    public UpdateResponse addBean(String collection, Object obj, int commitWithinMs, String username)
-            throws IOException, SolrServerException {
-        return solrClient.addBean(SolrTableUtils.getCollectionNameWithDomainName(collection), obj, commitWithinMs);
-    }
-
-    public UpdateResponse addBean(Object obj, int commitWithinMs, String username)
-            throws IOException, SolrServerException {
-        return solrClient.addBean(obj, commitWithinMs);
-    }
-
-    public UpdateResponse addBeans(String collection, Collection<?> beans, String username)
-            throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beans);
-    }
-
-    public UpdateResponse addBeans(Collection<?> beans, String username) throws SolrServerException, IOException {
-        return solrClient.addBeans(beans);
-    }
-
-    public UpdateResponse addBeans(String collection, Collection<?> beans, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beans, commitWithinMs);
-    }
-
-    public UpdateResponse addBeans(Collection<?> beans, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.addBeans(beans, commitWithinMs);
-    }
-
-    public UpdateResponse addBeans(String collection, final Iterator<?> beanIterator, String username)
-            throws SolrServerException, IOException {
-        return solrClient.addBeans(SolrTableUtils.getCollectionNameWithDomainName(collection), beanIterator);
-    }
-
-    public UpdateResponse addBeans(Iterator<?> beanIterator, String username) throws SolrServerException, IOException {
-        return solrClient.addBeans(beanIterator);
-    }
-
-    public UpdateResponse commit(String collection, String username) throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection));
-    }
-
-    public UpdateResponse commit(String collection, boolean waitFlush, boolean waitSearcher, String username)
-            throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher);
-    }
-
-    public UpdateResponse commit(boolean waitFlush, boolean waitSearcher, String username)
-            throws SolrServerException, IOException {
-        return solrClient.commit(waitFlush, waitSearcher);
-    }
-
-    public UpdateResponse commit(String collection, boolean waitFlush, boolean waitSearcher, boolean softCommit,
-                                 String username) throws SolrServerException, IOException {
-        return solrClient.commit(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher,
-                                 softCommit);
-    }
-
-    public UpdateResponse commit(boolean waitFlush, boolean waitSearcher, boolean softCommit, String username)
-            throws SolrServerException, IOException {
-        return solrClient.commit(waitFlush, waitSearcher, softCommit);
-    }
-
-    public UpdateResponse optimize(String collection, String username) throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection));
-    }
-
-    public UpdateResponse optimizeAuthorizedByUser(String username) throws SolrServerException, IOException {
-        return solrClient.optimize();
-    }
-
-    public UpdateResponse optimize(String collection, boolean waitFlush, boolean waitSearcher, String username)
-            throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher);
-    }
-
-    public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, String username)
-            throws SolrServerException, IOException {
-        return solrClient.optimize(waitFlush, waitSearcher);
-    }
-
-    public UpdateResponse optimize(String collection, boolean waitFlush, boolean waitSearcher, int maxSegments,
-                                   String username) throws SolrServerException, IOException {
-        return solrClient.optimize(SolrTableUtils.getCollectionNameWithDomainName(collection), waitFlush, waitSearcher,
-                                   maxSegments);
-    }
-
-    public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, int maxSegments, String username)
-            throws SolrServerException, IOException {
-        return solrClient.optimize(waitFlush, waitSearcher, maxSegments);
-    }
-
-    public UpdateResponse rollback(String collection, String username) throws SolrServerException, IOException {
-        return solrClient.rollback(SolrTableUtils.getCollectionNameWithDomainName(collection));
-    }
-
-    public UpdateResponse rollbackAuthorizedByUser(String username) throws SolrServerException, IOException {
-        return solrClient.rollback();
-    }
-
-    public UpdateResponse deleteById(String collection, String id, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), id);
-    }
-
-    public UpdateResponse deleteByIdAuthorizedByUser(String id, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(id);
-    }
-
-    public UpdateResponse deleteById(String collection, String id, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), id, commitWithinMs);
-    }
-
-    public UpdateResponse deleteById(String id, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(id, commitWithinMs);
-    }
-
-    public UpdateResponse deleteById(String collection, List<String> ids, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids);
-    }
-
-    public UpdateResponse deleteById(List<String> ids, String username) throws SolrServerException, IOException {
-        return solrClient.deleteById(ids);
-    }
-
-    public UpdateResponse deleteById(String collection, List<String> ids, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids, commitWithinMs);
-    }
-
-    public UpdateResponse deleteById(List<String> ids, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteById(ids, commitWithinMs);
-    }
-
-    public UpdateResponse deleteByQuery(String collection, String query, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(collection), query);
-    }
-
-    public UpdateResponse deleteByQueryAuthorizedByUser(String query, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(query);
-    }
-
-    public UpdateResponse deleteByQuery(String collection, String query, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(SolrTableUtils.getCollectionNameWithDomainName(collection), query,
-                                        commitWithinMs);
-    }
-
-    public UpdateResponse deleteByQuery(String query, int commitWithinMs, String username)
-            throws SolrServerException, IOException {
-        return solrClient.deleteByQuery(query, commitWithinMs);
-    }
-
-    public SolrPingResponse ping(String username) throws SolrServerException, IOException {
-        return solrClient.ping();
-    }
-
-    public QueryResponse query(String collection, SolrParams params, String username)
-            throws SolrServerException, IOException {
-        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(collection), params);
-    }
-
-    public QueryResponse query(SolrParams params, String username) throws SolrServerException, IOException {
-        return solrClient.query(params);
-    }
-
-    public QueryResponse query(String collection, SolrParams params, SolrRequest.METHOD method, String username)
-            throws SolrServerException, IOException {
-        return solrClient.query(SolrTableUtils.getCollectionNameWithDomainName(collection), params, method);
-    }
-
-    public QueryResponse query(SolrParams params, SolrRequest.METHOD method, String username)
-            throws SolrServerException, IOException {
-        return solrClient.query(params, method);
-    }
-
-    public QueryResponse queryAndStreamResponse(String collection, SolrParams params,
-                                                StreamingResponseCallback callback, String username)
-            throws SolrServerException, IOException {
-        return solrClient.queryAndStreamResponse(SolrTableUtils.getCollectionNameWithDomainName(collection), params,
-                                                 callback);
-    }
-
-    public QueryResponse queryAndStreamResponse(SolrParams params, StreamingResponseCallback callback, String username)
-            throws SolrServerException, IOException {
-        return solrClient.queryAndStreamResponse(params, callback);
-    }
-
-    public SolrDocument getById(String collection, String id, String username) throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), id);
-    }
-
-    public SolrDocument getByIdAuthorizedByUser(String id, String username) throws SolrServerException, IOException {
-        return solrClient.getById(id);
-    }
-
-    public SolrDocument getById(String collection, String id, SolrParams params, String username)
-            throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), id, params);
-    }
-
-    public SolrDocument getById(String id, SolrParams params, String username) throws SolrServerException, IOException {
-        return solrClient.getById(id, params);
-    }
-
-    public SolrDocumentList getById(String collection, Collection<String> ids, String username)
-            throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids);
-    }
-
-    public SolrDocumentList getById(Collection<String> ids, String username) throws SolrServerException, IOException {
-        return solrClient.getById(ids);
-    }
-
-    public SolrDocumentList getById(String collection, Collection<String> ids, SolrParams params, String username)
-            throws SolrServerException, IOException {
-        return solrClient.getById(SolrTableUtils.getCollectionNameWithDomainName(collection), ids, params);
-    }
-
-    public SolrDocumentList getById(Collection<String> ids, SolrParams params, String username)
-            throws SolrServerException, IOException {
-        return solrClient.getById(ids, params);
-    }
-
-    public NamedList<Object> request(SolrRequest request, String collection, String username)
-            throws SolrServerException, IOException {
-        return solrClient.request(request, SolrTableUtils.getCollectionNameWithDomainName(collection));
+        return solrClient.request(request, SolrTableUtils.getCollectionNameWithDomainName(domain, collection));
     }
 
     public DocumentObjectBinder getBinder() {

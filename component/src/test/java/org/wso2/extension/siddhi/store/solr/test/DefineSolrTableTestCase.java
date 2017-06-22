@@ -27,6 +27,7 @@ import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceExceptio
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrSchemaNotFoundException;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * This class contains the test cases related to SolrEventTable
@@ -40,7 +41,7 @@ public class DefineSolrTableTestCase {
     public void testDefineSolrTable() {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
-                "@store(type='solr', url='localhost:9983', collection='TEST1', base.config='gettingstarted', " +
+                "@store(type='solr', collection='TEST1', base.config='gettingstarted', " +
                 "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
@@ -58,6 +59,18 @@ public class DefineSolrTableTestCase {
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testDefineSolrTable2() throws SolrClientServiceException, SolrSchemaNotFoundException {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', zookeeper.url='localhost:3456', collection='TEST1', base" +
+                ".config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
+                "define table Footable(time long, date string);";
+
+        siddhiManager.createSiddhiAppRuntime(defineQuery);
     }
 
     @AfterClass

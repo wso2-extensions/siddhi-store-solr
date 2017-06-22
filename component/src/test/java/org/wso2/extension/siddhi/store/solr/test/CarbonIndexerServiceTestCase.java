@@ -47,6 +47,7 @@ import java.util.Map;
 public class CarbonIndexerServiceTestCase {
 
     private static final String TABLE_T1 = "T1";
+    private static final String DEFAULT_DOMAIN = "DEFAULT";
     private static SolrClientServiceImpl indexerService;
 
 
@@ -58,7 +59,8 @@ public class CarbonIndexerServiceTestCase {
     @Test
     public void step1_testCreateIndexForTable() throws SolrClientServiceException {
         CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).shards(2)
-                .replicas(2).configs("gettingstarted").solrServerUrl("localhost:9983").build();
+                .replicas(2).configSet("gettingstarted").solrServerUrl("localhost:9983").domainName(DEFAULT_DOMAIN).
+        build();
         indexerService.initCollection(config);
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
     }
@@ -66,7 +68,8 @@ public class CarbonIndexerServiceTestCase {
     @Test(dependsOnMethods = "step1_testCreateIndexForTable")
     public void step2_testCreateExistingIndex() throws SolrClientServiceException {
         CollectionConfiguration config = new CollectionConfiguration.Builder().collectionName(TABLE_T1).shards(2)
-                .replicas(2).configs("gettingstarted").solrServerUrl("localhost:9983").build();
+                .replicas(2).configSet("gettingstarted").solrServerUrl("localhost:9983").domainName(DEFAULT_DOMAIN)
+                .build();
         Assert.assertTrue(indexerService.collectionExists(TABLE_T1));
         Assert.assertFalse(indexerService.initCollection(config));
     }

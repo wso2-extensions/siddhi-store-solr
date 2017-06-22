@@ -47,8 +47,6 @@ import java.util.regex.Pattern;
 public class SolrTableUtils {
 
     private static Log log = LogFactory.getLog(SolrTableUtils.class);
-
-    private static final String tenantDomain = "DEFAULT";
     private static ThreadLocal<SecureRandom> secureRandom = new ThreadLocal<SecureRandom>() {
         protected SecureRandom initialValue() {
             return new SecureRandom();
@@ -77,9 +75,9 @@ public class SolrTableUtils {
         return solrDocs;
     }
 
-    public static String getCollectionNameWithDomainName(String tableName) {
-        if (tableName != null) {
-            return tenantDomain + "_" + tableName;
+    public static String getCollectionNameWithDomainName(String domain, String tableName) {
+        if (tableName != null && domain != null) {
+            return domain + "_" + tableName;
         } else {
             return null;
         }
