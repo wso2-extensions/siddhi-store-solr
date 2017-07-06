@@ -2,7 +2,7 @@ Siddhi-store-solr
 ======================================
 ---
 ##### New version of Siddhi v4.0.0 is built in Java 8.
-##### Latest Released Version v4.0.0-M4.
+##### Latest Released Solr Store Version v1.0.2.
 
 This is an extension for siddhi Solr event table implementation. This extension can be used to persist events to a
 Solr cloud instance of version 6.x.x.
@@ -47,8 +47,8 @@ Features Supported
 ---
 ## How to Contribute
 
-* Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)
-* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-io-http/tree/master)
+* Please report issues at [Solr Store Issues] (https://github.com/wso2-extensions/siddhi-store-solr/issues)
+* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-store-solr/tree/master)
 
 ---
 ## Contact us
