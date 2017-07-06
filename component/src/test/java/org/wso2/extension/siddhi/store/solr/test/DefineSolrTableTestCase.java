@@ -19,15 +19,14 @@
 package org.wso2.extension.siddhi.store.solr.test;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchema;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchemaField;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrSchemaNotFoundException;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * This class contains the test cases related to SolrEventTable
@@ -45,7 +44,8 @@ public class DefineSolrTableTestCase {
                 "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
-        siddhiManager.createSiddhiAppRuntime(defineQuery);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
         indexerService = SolrClientServiceImpl.INSTANCE;
         try {
             Assert.assertTrue(indexerService.collectionExists("TEST1"));
@@ -58,22 +58,31 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
         }
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test
     public void testDefineSolrTable2() throws SolrClientServiceException, SolrSchemaNotFoundException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
-                "@store(type='solr', zookeeper.url='localhost:3456', collection='TEST1', base" +
+                "@store(type='solr', zookeeper.url='localhost:3456', collection='TEST2', base" +
                 ".config='gettingstarted', " +
                 "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
                 "define table Footable(time long, date string);";
 
-        siddhiManager.createSiddhiAppRuntime(defineQuery);
+        SiddhiAppRuntime runtime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        runtime.start();
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            //ignore
+        } finally {
+            runtime.shutdown();
+        }
     }
 
-    @AfterClass
     public static void deleteTables() throws Exception {
         try {
             indexerService.deleteCollection("TEST1");

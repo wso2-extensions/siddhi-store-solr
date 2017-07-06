@@ -36,7 +36,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ConditionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
@@ -118,12 +118,17 @@ public class SolrTable extends AbstractRecordTable {
     private boolean mergeSchema;
     private int readBatchSize;
     private int updateBatchSize;
+    private SolrSchema solrSchema;
+    private boolean schemaUpdatedOnce;
+    private boolean connectedOnce;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
         this.attributes = tableDefinition.getAttributeList();
+        this.schemaUpdatedOnce = false;
+        this.connectedOnce = false;
         Annotation primaryKeyAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PRIMARY_KEY,
-                                                                         tableDefinition.getAnnotations());
+                tableDefinition.getAnnotations());
         Annotation storeAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE, tableDefinition
                 .getAnnotations());
         if (primaryKeyAnnotation != null) {
@@ -180,19 +185,11 @@ public class SolrTable extends AbstractRecordTable {
                     .PROPERTY_UPDATE_BATCH_SIZE, SolrTableConstants.DEFAULT_UPDATE_BATCH_SIZE));
             String domainName = configReader.readConfig(SolrTableConstants.PROPERTY_DOMAIN_IDENTIFIER,
                     SolrTableConstants.DEFAULT_PROPERTY_DOMAIN_IDENTIFIER);
-            SolrSchema solrSchema = SolrTableUtils.createIndexSchema(schema);
-            collectionConfig = new CollectionConfiguration.Builder().collectionName
+            this.solrSchema = SolrTableUtils.createIndexSchema(schema);
+            this.collectionConfig = new CollectionConfiguration.Builder().collectionName
                     (collection).solrServerUrl(url).shards(Integer.parseInt(shards)).replicas(Integer.parseInt
-                    (replicas)).configSet(configSet).schema(solrSchema).domainName(domainName).build();
-            solrClientService = SolrClientServiceImpl.INSTANCE;
-            try {
-                solrClientService.initCollection(collectionConfig);
-                solrClientService.updateSolrSchema(collectionConfig.getCollectionName(), solrSchema, this.mergeSchema);
-            } catch (SolrClientServiceException | SolrException e) {
-                log.error("Error while initializing the Solr Event table: " + e.getMessage(), e);
-                throw new SiddhiAppCreationException("Error while initializing the Solr Event table: " + e
-                        .getMessage(), e);
-            }
+                    (replicas)).configSet(configSet).schema(this.solrSchema).domainName(domainName).build();
+            this.solrClientService = SolrClientServiceImpl.INSTANCE;
         }
     }
 
@@ -204,7 +201,7 @@ public class SolrTable extends AbstractRecordTable {
             solrClientService.insertDocuments(collectionConfig.getCollectionName(), siddhiSolrDocuments,
                     commitAsync);
         } catch (SolrClientServiceException | SolrException e) {
-            throw new SolrTableException("Error while inserting records to Solr Event Table: " + e.getMessage(), e);
+            log.error("Error while inserting records to Solr Event Table: " + e.getMessage(), e);
         }
     }
 
@@ -241,7 +238,7 @@ public class SolrTable extends AbstractRecordTable {
                 solrClientService.deleteDocuments(collectionConfig.getCollectionName(), condition, commitAsync);
             }
         } catch (SolrClientServiceException | SolrException e) {
-            throw new SolrTableException("Error while deleting documents from Solr Event Table: " + e.getMessage(), e);
+            log.error("Error while deleting documents from Solr Event Table: " + e.getMessage(), e);
         }
     }
 
@@ -251,7 +248,7 @@ public class SolrTable extends AbstractRecordTable {
         try {
             upsertSolrDocuments(updateConditionParameterMaps, compiledCondition, updateValues, null);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
-            throw new SolrTableException("Error while searching records for updating: " + e.getMessage(), e);
+            log.error("Error while searching records for updating: " + e.getMessage(), e);
         }
     }
 
@@ -334,7 +331,7 @@ public class SolrTable extends AbstractRecordTable {
         try {
             upsertSolrDocuments(updateConditionParameterMaps, compiledCondition, updateValues, addingRecords);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
-            throw new SolrTableException("Error while searching records for updating/adding: " + e.getMessage(), e);
+            log.error("Error while searching records for updating/adding: " + e.getMessage(), e);
         }
 
     }
@@ -344,5 +341,37 @@ public class SolrTable extends AbstractRecordTable {
         SolrConditionVisitor visitor = new SolrConditionVisitor();
         conditionBuilder.build(visitor);
         return new SolrCompiledCondition(visitor.returnCondition());
+    }
+
+    @Override
+    protected void connect() throws ConnectionUnavailableException {
+        try {
+            if (!connectedOnce) {
+                solrClientService.initCollection(collectionConfig);
+                connectedOnce = true;
+            }
+            if (!schemaUpdatedOnce) {
+                solrClientService.updateSolrSchema(collectionConfig.getCollectionName(), solrSchema, this.mergeSchema);
+                schemaUpdatedOnce = true;
+            }
+        } catch (SolrException | SolrClientServiceException e) {
+            throw new ConnectionUnavailableException("Error while initializing the solr Event table: " +
+                    e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void disconnect() {
+        //ignore
+    }
+
+    @Override
+    protected void destroy() {
+        try {
+            solrClientService.tryToCloseClient(collectionConfig);
+        } catch (IOException e) {
+            log.info("Error while trying to close the solr client for table: " + collectionConfig.getCollectionName()
+                     + ", url: " + collectionConfig.getSolrServerUrl() + ", error: " + e.getMessage(), e);
+        }
     }
 }

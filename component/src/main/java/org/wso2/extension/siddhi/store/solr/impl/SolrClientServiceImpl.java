@@ -58,9 +58,9 @@ public enum  SolrClientServiceImpl {
     private static final String ATTR_COLLECTIONS = "collections";
     private static Log log = LogFactory.getLog(SolrClientServiceImpl.class);
     private volatile SiddhiSolrClient indexerClient = null;
-    private static Map<String, SolrSchema> solrSchemaCache = new ConcurrentHashMap<>();
     private static Map<String, CollectionConfiguration> tableToConfigMapping = new ConcurrentHashMap<>();
     private static Map<String, SiddhiSolrClient> urlToSolrClientMapping = new ConcurrentHashMap<>();
+    private static Map<String, Integer> urlToTableCountMapping = new ConcurrentHashMap<>();
 
     public SiddhiSolrClient getSolrServiceClientByCollection(String collection) throws SolrClientServiceException {
         synchronized (this) {
@@ -86,44 +86,50 @@ public enum  SolrClientServiceImpl {
     public boolean initCollection(CollectionConfiguration config)
             throws SolrClientServiceException {
         String table = config.getCollectionName();
-        String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(config.getDomainName(), table);
+        String tableNameWithDomain = SolrTableUtils.getCollectionNameWithDomainName(config.getDomainName(), table);
         initSolrClientForTable(config);
-
         try {
             if (!collectionExists(table)) {
                 if (!collectionConfigExists(table)) {
                     ConfigSetAdminResponse configSetResponse = createInitialSolrCollectionConfig(config);
                     Object errors = configSetResponse.getErrorMessages();
                     if (configSetResponse.getStatus() == 0 && errors == null) {
-                        return createSolrCollection(tableNameWithTenant, config);
+                        return createSolrCollection(tableNameWithDomain, config);
                     } else {
                         throw new SolrClientServiceException("Error in deploying initial solr configset for " +
-                                "table: " + tableNameWithTenant + ", Response code: " + configSetResponse.getStatus() +
+                                "table: " + tableNameWithDomain + ", Response code: " + configSetResponse.getStatus() +
                                 " , errors: " + errors.toString());
                     }
                 } else {
-                    return createSolrCollection(tableNameWithTenant, config);
+                    return createSolrCollection(tableNameWithDomain, config);
                 }
+            } else {
+                return false;
             }
-            return false;
         } catch (SolrServerException | IOException | SolrException e) {
-            throw new SolrClientServiceException("error while creating the index for table: " + table + ": " +
+            throw new SolrClientServiceException("error while creating the index for table: " + table + " error: " +
                     e.getMessage(), e);
         }
     }
 
     private void initSolrClientForTable(CollectionConfiguration config) throws SolrClientServiceException {
         synchronized (this) {
-            tableToConfigMapping.put(config.getCollectionName(), config);
             String serverURL = config.getSolrServerUrl();
             if (serverURL == null || serverURL.isEmpty()) {
                 throw new SolrClientServiceException("Solr server URL for collection: " + config.getCollectionName() +
                                                      " cannot be empty or null");
             }
+            tableToConfigMapping.put(config.getCollectionName(), config);
             CloudSolrClient solrClient = new CloudSolrClient.Builder().withZkHost(config.getSolrServerUrl()).build();
             solrClient.setParser(new XMLResponseParser());
             urlToSolrClientMapping.put(config.getSolrServerUrl(), new SiddhiSolrClient(config.getDomainName(),
-                                                                                       solrClient));
+                    solrClient));
+            Integer count = urlToTableCountMapping.get(config.getSolrServerUrl());
+            if (count == null) {
+                urlToTableCountMapping.put(config.getSolrServerUrl(), Integer.valueOf(1));
+            } else {
+                urlToTableCountMapping.put(config.getSolrServerUrl(), count + 1);
+            }
         }
     }
 
@@ -134,7 +140,7 @@ public enum  SolrClientServiceImpl {
     private ConfigSetAdminResponse createInitialSolrCollectionConfig(CollectionConfiguration config)
             throws SolrServerException, IOException,
                    SolrClientServiceException {
-        String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(config.getDomainName(), config
+        String tableNameWithDomain = SolrTableUtils.getCollectionNameWithDomainName(config.getDomainName(), config
                 .getCollectionName());
         ConfigSetAdminRequest.Create configSetAdminRequest = new ConfigSetAdminRequest.Create();
         if (config.getConfigSet() != null && !config.getConfigSet().trim().isEmpty()) {
@@ -142,14 +148,14 @@ public enum  SolrClientServiceImpl {
         } else {
             throw new SolrClientServiceException("Base configset cannot be found");
         }
-        configSetAdminRequest.setConfigSetName(tableNameWithTenant);
+        configSetAdminRequest.setConfigSetName(tableNameWithDomain);
         return configSetAdminRequest.process(getSolrServiceClientByCollection(config.getCollectionName()));
     }
 
-    private boolean createSolrCollection(String tableNameWithTenant, CollectionConfiguration config)
+    private boolean createSolrCollection(String tableNameWithDomain, CollectionConfiguration config)
             throws SolrServerException, IOException, SolrClientServiceException {
         CollectionAdminRequest.Create createRequest =
-                CollectionAdminRequest.createCollection(tableNameWithTenant, tableNameWithTenant,
+                CollectionAdminRequest.createCollection(tableNameWithDomain, tableNameWithDomain,
                                                         config.getNoOfShards(),
                                                         config.getNoOfReplicas());
         createRequest.setMaxShardsPerNode(config.getNoOfShards());
@@ -158,7 +164,7 @@ public enum  SolrClientServiceImpl {
         if (!collectionAdminResponse.isSuccess()) {
             Object errors = collectionAdminResponse.getErrorMessages();
             throw new SolrClientServiceException("Error in deploying initial solr configset for collection: " +
-                    tableNameWithTenant + ", Response code: " + collectionAdminResponse.getStatus() +
+                    tableNameWithDomain + ", Response code: " + collectionAdminResponse.getStatus() +
                     " , errors: " + errors.toString());
         }
         return true;
@@ -173,24 +179,26 @@ public enum  SolrClientServiceImpl {
         try {
             oldSchema = getSolrSchema(table);
         } catch (SolrSchemaNotFoundException e) {
-            throw new SolrClientServiceException("Error while retrieving  the Solr schema for table: " + table, e);
+            throw new SolrClientServiceException("Error while retrieving  the Solr schema for table: " + table + ", " +
+                    "error: " + e.getMessage(), e);
         }
+
         updateFields = createUpdateFields(solrSchema, merge, oldSchema, updateFields);
         SchemaRequest.MultiUpdate multiUpdateRequest = new SchemaRequest.MultiUpdate(updateFields);
         try {
             updateResponse = multiUpdateRequest.process(client, table);
-            // UpdateResponse does not have a "getErrorMessages()" method, so we check if the errors attribute exists
-            // in the response
+            // UpdateResponse does not have a "getErrorMessages()" method, so we check
+            // if the errors attribute exists in the response
             Object errors = updateResponse.getResponse().get(ATTR_ERRORS);
             if (updateResponse.getStatus() == 0 && errors == null) {
                 return true;
             } else {
                 throw new SolrClientServiceException("Couldn't update index schema, Response code: " +
-                        updateResponse.getStatus() + ", Errors: " + errors);
+                        updateResponse.getStatus() + ", errors: " + errors);
             }
         } catch (SolrServerException | IOException | SolrException e) {
-            throw new SolrClientServiceException("error while updating the index schema for table: " + table + ": " +
-                    e.getMessage(), e);
+            throw new SolrClientServiceException("error while updating the index schema for table: " +
+                    table + " error: " + e.getMessage(), e);
         }
     }
 
@@ -260,14 +268,14 @@ public enum  SolrClientServiceImpl {
                     SchemaResponse.UniqueKeyResponse uniqueKeyResponse = uniqueKeyRequest.process(client, table);
                     List<Map<String, Object>> fields = fieldsResponse.getFields();
                     String uniqueKey = uniqueKeyResponse.getUniqueKey();
-                    SolrSchema solrSchema = createSolrSchema(uniqueKey, fields);
-                    return solrSchema;
+                    SolrSchema schema = createSolrSchema(uniqueKey, fields);
+                    return schema;
                 } else {
                     throw new SolrSchemaNotFoundException("Index schema for table: " + table + "is not found");
                 }
             } catch (SolrServerException | IOException | SolrException e) {
                 throw new SolrClientServiceException("error while retrieving the index schema for table: " + table +
-                                                     ": " + e.getMessage(), e);
+                        ", error: " + e.getMessage(), e);
             }
     }
 
@@ -299,20 +307,25 @@ public enum  SolrClientServiceImpl {
         try {
             if (collectionExists(table)) {
                 SiddhiSolrClient client = getSolrServiceClientByCollection(table);
-                String tableNameWithTenant = SolrTableUtils.getCollectionNameWithDomainName(tableToConfigMapping
-                        .get(table).getDomainName(), table);
+                CollectionConfiguration configuration = tableToConfigMapping.get(table);
+                if (configuration == null) {
+                    throw new SolrClientServiceException("Configuration is not set for table: " +
+                            table + ", call initCollection() first");
+                }
+                String tableNameWithDomain = SolrTableUtils.getCollectionNameWithDomainName(configuration.getDomainName
+                        (), table);
                 CollectionAdminRequest.Delete deleteRequest =
-                        CollectionAdminRequest.deleteCollection(tableNameWithTenant);
+                        CollectionAdminRequest.deleteCollection(tableNameWithDomain);
                 CollectionAdminResponse deleteRequestResponse =
-                        deleteRequest.process(client, tableNameWithTenant);
+                        deleteRequest.process(client, tableNameWithDomain);
                 if (deleteRequestResponse.isSuccess() && collectionConfigExists(table)) {
                     ConfigSetAdminRequest.Delete configSetAdminRequest = new ConfigSetAdminRequest.Delete();
-                    configSetAdminRequest.setConfigSetName(tableNameWithTenant);
+                    configSetAdminRequest.setConfigSetName(tableNameWithDomain);
                     ConfigSetAdminResponse configSetResponse = configSetAdminRequest.process(client);
-                    solrSchemaCache.remove(tableNameWithTenant);
                     Object errors = configSetResponse.getErrorMessages();
                     if (configSetResponse.getStatus() == 0 && errors == null) {
-                        return true;
+                        tableToConfigMapping.remove(table);
+                        return tryToCloseClient(configuration);
                     } else {
                         throw new SolrClientServiceException("Error in deleting index for table: " + table + ", " +
                                 ", Response code: " + configSetResponse.getStatus() + " , errors: " +
@@ -322,42 +335,66 @@ public enum  SolrClientServiceImpl {
             }
         } catch (IOException | SolrServerException | SolrException e) {
             log.error("error while deleting the index for table: " + table + ": " + e.getMessage(), e);
-            throw new SolrClientServiceException("error while deleting the index for table: " + table + ": " +
+            throw new SolrClientServiceException("error while deleting the index for table: " + table + ", error: " +
                                                  e.getMessage(), e);
         }
         return false;
     }
 
+    public boolean tryToCloseClient(CollectionConfiguration configuration) throws IOException {
+        synchronized (this) {
+            Integer count = urlToTableCountMapping.get(configuration.getSolrServerUrl());
+            if (count != null && count > 0) {
+                count -= 1;
+                urlToTableCountMapping.put(configuration.getSolrServerUrl(), count);
+                if (count == 0) {
+                    SolrClient client = urlToSolrClientMapping.get(configuration.getSolrServerUrl());
+                    client.close();
+                    urlToTableCountMapping.remove(configuration.getSolrServerUrl());
+                    urlToSolrClientMapping.remove(configuration.getSolrServerUrl());
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean collectionExists(String table) throws SolrClientServiceException {
         CollectionAdminRequest.List listRequest = CollectionAdminRequest.listCollections();
-        String tableWithTenant = SolrTableUtils.getCollectionNameWithDomainName(tableToConfigMapping.get(table)
-                .getDomainName(), table);
+        CollectionConfiguration configuration = tableToConfigMapping.get(table);
+        if (configuration == null) {
+            throw new SolrClientServiceException("Configuration is not set for table: " +
+                    table + ", call initCollection() first");
+        }
+        String tableWithDomain = SolrTableUtils.getCollectionNameWithDomainName(configuration.getDomainName(), table);
         try {
             CollectionAdminResponse listResponse = listRequest.process(getSolrServiceClientByCollection(table));
             Object errors = listResponse.getErrorMessages();
             if (listResponse.getStatus() == 0 && errors == null) {
                 List collections = (List) listResponse.getResponse().get(ATTR_COLLECTIONS);
-                return collections.contains(tableWithTenant);
+                return collections.contains(tableWithDomain);
             } else {
                 throw new SolrClientServiceException("Error in checking index for table: " + table + ", " +
                         ", Response code: " + listResponse.getStatus() + " , errors: " + errors.toString());
             }
         } catch (IOException | SolrServerException | SolrException e) {
-            throw new SolrClientServiceException("Error while checking the existence of index for table : " + table, e);
+            throw new SolrClientServiceException("Error while checking the existence of index for table : " + table +
+                    ", error: " + e.getMessage(), e);
         }
     }
 
     public boolean collectionConfigExists(String table) throws SolrClientServiceException {
         ConfigSetAdminResponse.List listRequestReponse;
         SiddhiSolrClient siddhiSolrClient = getSolrServiceClientByCollection(table);
-        String tableNameWithTenantDomain = SolrTableUtils.getCollectionNameWithDomainName(tableToConfigMapping.get
+        String tableNameWithDomain = SolrTableUtils.getCollectionNameWithDomainName(tableToConfigMapping.get
                 (table).getDomainName(), table);
         ConfigSetAdminRequest.List listRequest = new ConfigSetAdminRequest.List();
         try {
             listRequestReponse = listRequest.process(siddhiSolrClient);
             Object errors = listRequestReponse.getErrorMessages();
             if (listRequestReponse.getStatus() == 0 && errors == null) {
-                return listRequestReponse.getConfigSets().contains(tableNameWithTenantDomain);
+                return listRequestReponse.getConfigSets().contains(tableNameWithDomain);
             } else {
                 throw new SolrClientServiceException("Error in checking the existance of index configuration for " +
                         "table: '" + table + "', Response code: " +
@@ -365,7 +402,7 @@ public enum  SolrClientServiceImpl {
             }
         } catch (IOException | SolrServerException | SolrException e) {
             throw new SolrClientServiceException("Error while checking if index configurations exists for table: " +
-                                                 table, e);
+                    table + ", error: " + e.getMessage(), e);
         }
     }
 
@@ -378,7 +415,8 @@ public enum  SolrClientServiceImpl {
                 client.commit(table);
             }
         } catch (SolrServerException | IOException e) {
-            throw new SolrClientServiceException("Error while inserting the documents to index for table: " + table, e);
+            throw new SolrClientServiceException("Error while inserting the documents to index for table: " +
+                    table + ", error: " + e.getMessage(), e);
         }
     }
 
@@ -391,8 +429,8 @@ public enum  SolrClientServiceImpl {
                     client.commit(table);
                 }
             } catch (SolrServerException | IOException | SolrException e) {
-                throw new SolrClientServiceException("Error while deleting index documents by ids, " +
-                        e.getMessage(), e);
+                throw new SolrClientServiceException("Error while deleting index documents by ids, from table: " +
+                        table + ", error: " + e.getMessage(), e);
             }
         }
     }

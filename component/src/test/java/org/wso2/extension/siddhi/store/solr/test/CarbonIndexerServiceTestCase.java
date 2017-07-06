@@ -277,7 +277,7 @@ public class CarbonIndexerServiceTestCase {
         Assert.assertTrue(indexerService.deleteCollection(TABLE_T1));
     }
 
-    @Test(dependsOnMethods = "stepB_testDeleteIndexForTable")
+    @Test(expectedExceptions = SolrClientServiceException.class, dependsOnMethods = "stepB_testDeleteIndexForTable")
     public void stepC_testDeleteNonExistingIndex() throws SolrClientServiceException {
         Assert.assertFalse(indexerService.deleteCollection(TABLE_T1));
     }

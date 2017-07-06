@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -64,7 +63,6 @@ public class UpdateSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    @AfterClass
     public static void shutdown() throws SolrClientServiceException {
 
         if (indexerService == null) {
