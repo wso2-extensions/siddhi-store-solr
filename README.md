@@ -2,7 +2,7 @@ Siddhi-store-solr
 ======================================
 ---
 ##### New version of Siddhi v4.0.0 is built in Java 8.
-##### Latest Released Version v4.0.0-M4.
+##### Latest Released Solr Store Version v1.0.2.
 
 This is an extension for siddhi Solr event table implementation. This extension can be used to persist events to a
 Solr cloud instance of version 6.x.x.
