@@ -250,12 +250,12 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
 
     @Override
     public void beginVisitIn(String storeId) {
-        //Throw exception
+        //Not applicable
     }
 
     @Override
     public void endVisitIn(String storeId) {
-        //Throw exception
+        //Not applicable
     }
 
     @Override
@@ -270,52 +270,52 @@ public class SolrConditionVisitor extends BaseConditionVisitor {
 
     @Override
     public void beginVisitMath(MathOperator mathOperator) {
-        //throws exception
+        //Not applicable
     }
 
     @Override
     public void endVisitMath(MathOperator mathOperator) {
-        //throws exception
+        //Not applicable
     }
 
     @Override
     public void beginVisitMathLeftOperand(MathOperator mathOperator) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void endVisitMathLeftOperand(MathOperator mathOperator) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void beginVisitMathRightOperand(MathOperator mathOperator) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void endVisitMathRightOperand(MathOperator mathOperator) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void beginVisitAttributeFunction(String namespace, String functionName) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void endVisitAttributeFunction(String namespace, String functionName) {
-        //throw exception
+        //Not applicable
     }
 
     @Override
     public void beginVisitParameterAttributeFunction(int index) {
-        //
+        //Not applicable
     }
 
     @Override
     public void endVisitParameterAttributeFunction(int index) {
-        //
+        //Not applicable
     }
 
     @Override

@@ -19,7 +19,6 @@
 package org.wso2.extension.siddhi.store.solr.test;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
@@ -499,7 +498,6 @@ public class ReadFromSolrTableTestCase {
         }
     }
 
-    @AfterClass
     public static void deleteTables() throws Exception {
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         try {

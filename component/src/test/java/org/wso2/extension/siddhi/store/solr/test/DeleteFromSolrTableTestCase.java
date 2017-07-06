@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
@@ -48,7 +47,6 @@ public class DeleteFromSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    @AfterClass
     public static void shutdown() throws SolrClientServiceException {
         if (indexerService == null) {
             throw new SolrClientServiceException("Indexer Service cannot be loaded!");

@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -62,7 +61,6 @@ public class UpdateOrInsertSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    @AfterClass
     public static void shutdown() throws SolrClientServiceException {
         if (indexerService == null) {
             throw new SolrClientServiceException("Indexer Service cannot be loaded!");
@@ -72,7 +70,8 @@ public class UpdateOrInsertSolrTableTestCase {
             indexerService.deleteCollection("TEST23");
             indexerService.deleteCollection("TEST24");
             indexerService.deleteCollection("TEST25");
-            indexerService.deleteCollection("TEST26");
+        //    indexerService.deleteCollection("TEST26"); table never init; because of DuplicateDefinitionException,
+        //    so no need to delete. deleting non existing table will throw an exception
             indexerService.deleteCollection("TEST27");
             indexerService.deleteCollection("TEST28");
             indexerService.deleteCollection("TEST29");
