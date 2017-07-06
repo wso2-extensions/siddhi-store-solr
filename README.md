@@ -47,8 +47,8 @@ Features Supported
 ---
 ## How to Contribute
 
-* Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)
-* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-io-http/tree/master)
+* Please report issues at [Solr Store Issues] (https://github.com/wso2-extensions/siddhi-store-solr/issues)
+* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-store-solr/tree/master)
 
 ---
 ## Contact us
