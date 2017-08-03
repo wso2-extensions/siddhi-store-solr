@@ -18,11 +18,13 @@
 
 package org.wso2.extension.siddhi.store.solr.exceptions;
 
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+
 /**
  * This class represents the exception class thrown from the
  * {@link org.wso2.extension.siddhi.store.solr.SolrConditionVisitor}
  */
-public class SolrConditionVisitorException extends Exception {
+public class SolrConditionVisitorException extends SiddhiAppCreationException {
     public SolrConditionVisitorException(String message) {
         super(message);
     }

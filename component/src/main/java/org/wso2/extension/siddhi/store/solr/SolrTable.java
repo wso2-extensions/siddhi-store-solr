@@ -38,10 +38,12 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
-import org.wso2.siddhi.core.table.record.ConditionBuilder;
+import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
+import org.wso2.siddhi.core.table.record.RecordTableCompiledUpdateSet;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
@@ -63,9 +65,9 @@ import java.util.Map;
         name = "solr",
         namespace = "store",
         description = "Solr store implementation uses solr collections for underlying data storage. The events are " +
-                      "converted to Solr documents when the events are inserted to solr store. Solr documents are " +
-                      "converted to Events when the Solr documents are read from solr collections. This can only be " +
-                      "used with the Solr cloud mode.",
+                "converted to Solr documents when the events are inserted to solr store. Solr documents are " +
+                "converted to Events when the Solr documents are read from solr collections. This can only be " +
+                "used with the Solr cloud mode.",
         parameters = {
                 @Parameter(name = "collection",
                         description = "The name of the solr collection.",
@@ -95,14 +97,14 @@ import java.util.Map;
         examples = {
                 @Example(
                         syntax = "@store(type='solr', zookeeper.url='localhost:9983', collection='TEST1', base" +
-                                 ".config='gettingstarted', " +
-                                 "shards='2', replicas='2', schema='time long stored, date string stored', " +
-                                 "commit.async='true')" +
-                                 "define table Footable(time long, date string);",
-                description = "Above example will create a solr collection which has two shards with two replicas " +
-                              "which is named TEST1, using the basic config 'gettingstarted'. it will have two fields" +
-                              " time and date. both fields will be indexed and stored in solr. all the inserts will " +
-                              "be commited asynchronously from the solr server side")
+                                ".config='gettingstarted', " +
+                                "shards='2', replicas='2', schema='time long stored, date string stored', " +
+                                "commit.async='true')" +
+                                "define table Footable(time long, date string);",
+                        description = "Above example will create a solr collection which has two shards with two " +
+                                "replicas which is named TEST1, using the basic config 'gettingstarted'. it will " +
+                                "have two fields time and date. both fields will be indexed and stored in solr. all " +
+                                "the inserts will be committed asynchronously from the solr server side")
         }
 )
 
@@ -143,7 +145,7 @@ public class SolrTable extends AbstractRecordTable {
             String url = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_URL);
             String shards = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SHARDS);
             String replicas = storeAnnotation.getElement(SolrTableConstants
-                                                                 .ANNOTATION_ELEMENT_REPLICAS);
+                    .ANNOTATION_ELEMENT_REPLICAS);
             String schema = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_SCHEMA);
             String configSet = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_CONFIGSET);
             String commitAsync = storeAnnotation.getElement(SolrTableConstants.ANNOTATION_ELEMENT_COMMIT_ASYNC);
@@ -177,7 +179,7 @@ public class SolrTable extends AbstractRecordTable {
             }
             if (configSet == null || configSet.isEmpty()) {
                 configSet = configReader.readConfig(SolrTableConstants.ANNOTATION_ELEMENT_CONFIGSET,
-                                                    SolrTableConstants.DEFAULT_SOLR_BASE_CONFIG_NAME);
+                        SolrTableConstants.DEFAULT_SOLR_BASE_CONFIG_NAME);
             }
             this.readBatchSize = Integer.parseInt(configReader.readConfig(SolrTableConstants
                     .PROPERTY_READ_BATCH_SIZE, SolrTableConstants.DEFAULT_READ_ITERATOR_BATCH_SIZE));
@@ -243,18 +245,22 @@ public class SolrTable extends AbstractRecordTable {
     }
 
     @Override
-    protected void update(List<Map<String, Object>> updateConditionParameterMaps, CompiledCondition compiledCondition,
-                          List<Map<String, Object>> updateValues) {
+    protected void update(CompiledCondition updateCondition,
+                          List<Map<String, Object>> updateConditionParameterMaps,
+                          RecordTableCompiledUpdateSet updateSet,
+                          List<Map<String, Object>> updateSetParameterMaps) throws ConnectionUnavailableException {
         try {
-            upsertSolrDocuments(updateConditionParameterMaps, compiledCondition, updateValues, null);
+            upsertSolrDocuments(updateConditionParameterMaps, updateCondition, updateSetParameterMaps,
+                    updateSet, null);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
             log.error("Error while searching records for updating: " + e.getMessage(), e);
         }
     }
 
     private void upsertSolrDocuments(List<Map<String, Object>> updateConditionParameterMaps,
-                                     CompiledCondition compiledCondition, List<Map<String, Object>> updateValues,
-                                     List<Object[]> addingRecords)
+                                     CompiledCondition compiledCondition,
+                                     List<Map<String, Object>> updateSetParameterMaps,
+                                     RecordTableCompiledUpdateSet updateSet, List<Object[]> addingRecords)
             throws SolrClientServiceException, SolrServerException, IOException {
         List<SiddhiSolrDocument> addDocs = new ArrayList<>();
         for (int index = 0; index < updateConditionParameterMaps.size(); index++) {
@@ -263,8 +269,14 @@ public class SolrTable extends AbstractRecordTable {
             if (solrRecordIterator.hasNext()) {
                 List<String> deleteDocIds = new ArrayList<>();
                 List<SiddhiSolrDocument> updateDocs = new ArrayList<>();
-                Map<String, Object> updateFields = updateValues.get(index);
-                Collection<String> updatablePrimaryKeys = updateValues.get(0).keySet();
+                Map<String, Object> updateSetParameterMap = updateSetParameterMaps.get(index);
+                Map<String, Object> updateFields = new HashMap<>();
+                for (Map.Entry<String, CompiledExpression> entry : updateSet.getUpdateSetMap().entrySet()) {
+                    updateFields.put(entry.getKey(),
+                            SolrTableUtils.resolveCondition((SolrCompiledCondition) entry.getValue(),
+                                    updateSetParameterMap, collectionConfig.getCollectionName()));
+                }
+                Collection<String> updatablePrimaryKeys = updateFields.keySet();
                 if (primaryKeys != null && !primaryKeys.isEmpty()) {
                     updatablePrimaryKeys.retainAll(primaryKeys);
                 }
@@ -318,18 +330,21 @@ public class SolrTable extends AbstractRecordTable {
         List<SiddhiSolrDocument> addDocs = new ArrayList<>();
         if (addingRecords != null && !addingRecords.isEmpty()) {
             SiddhiSolrDocument newDoc = SolrTableUtils.createSolrDocument(attributes, primaryKeys,
-                                                                         addingRecords.get(index));
+                    addingRecords.get(index));
             addDocs.add(newDoc);
         }
         return addDocs;
     }
 
     @Override
-    protected void updateOrAdd(List<Map<String, Object>> updateConditionParameterMaps,
-                               CompiledCondition compiledCondition, List<Map<String, Object>> updateValues,
-                               List<Object[]> addingRecords) {
+    protected void updateOrAdd(CompiledCondition updateCondition,
+                               List<Map<String, Object>> updateConditionParameterMaps,
+                               RecordTableCompiledUpdateSet updateSet,
+                               List<Map<String, Object>> updateSetParameterMaps, List<Object[]> addingRecords)
+            throws ConnectionUnavailableException {
         try {
-            upsertSolrDocuments(updateConditionParameterMaps, compiledCondition, updateValues, addingRecords);
+            upsertSolrDocuments(updateConditionParameterMaps, updateCondition,
+                    updateSetParameterMaps, updateSet, addingRecords);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
             log.error("Error while searching records for updating/adding: " + e.getMessage(), e);
         }
@@ -337,11 +352,19 @@ public class SolrTable extends AbstractRecordTable {
     }
 
     @Override
-    protected CompiledCondition compileCondition(ConditionBuilder conditionBuilder) {
+    protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
         SolrConditionVisitor visitor = new SolrConditionVisitor();
-        conditionBuilder.build(visitor);
+        expressionBuilder.build(visitor);
         return new SolrCompiledCondition(visitor.returnCondition());
     }
+
+    @Override
+    protected CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder) {
+        SolrSetExpressionVisitor visitor = new SolrSetExpressionVisitor();
+        expressionBuilder.build(visitor);
+        return new SolrCompiledCondition(visitor.returnExpression());
+    }
+
 
     @Override
     protected void connect() throws ConnectionUnavailableException {
@@ -370,8 +393,9 @@ public class SolrTable extends AbstractRecordTable {
         try {
             solrClientService.tryToCloseClient(collectionConfig);
         } catch (IOException e) {
-            log.info("Error while trying to close the solr client for table: " + collectionConfig.getCollectionName()
-                     + ", url: " + collectionConfig.getSolrServerUrl() + ", error: " + e.getMessage(), e);
+            log.info("Error while trying to close the solr client for table: " +
+                    collectionConfig.getCollectionName() + ", url: " + collectionConfig.getSolrServerUrl() +
+                    ", error: " + e.getMessage(), e);
         }
     }
 }
