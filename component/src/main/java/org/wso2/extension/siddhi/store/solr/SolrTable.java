@@ -40,7 +40,6 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
-import org.wso2.siddhi.core.table.record.RecordTableCompiledUpdateSet;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
@@ -247,11 +246,11 @@ public class SolrTable extends AbstractRecordTable {
     @Override
     protected void update(CompiledCondition updateCondition,
                           List<Map<String, Object>> updateConditionParameterMaps,
-                          RecordTableCompiledUpdateSet updateSet,
+                          Map<String, CompiledExpression> updateSetCompiledExpressionMap,
                           List<Map<String, Object>> updateSetParameterMaps) throws ConnectionUnavailableException {
         try {
             upsertSolrDocuments(updateConditionParameterMaps, updateCondition, updateSetParameterMaps,
-                    updateSet, null);
+                    updateSetCompiledExpressionMap, null);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
             log.error("Error while searching records for updating: " + e.getMessage(), e);
         }
@@ -260,7 +259,8 @@ public class SolrTable extends AbstractRecordTable {
     private void upsertSolrDocuments(List<Map<String, Object>> updateConditionParameterMaps,
                                      CompiledCondition compiledCondition,
                                      List<Map<String, Object>> updateSetParameterMaps,
-                                     RecordTableCompiledUpdateSet updateSet, List<Object[]> addingRecords)
+                                     Map<String, CompiledExpression> updateSetCompiledExpressionMap,
+                                     List<Object[]> addingRecords)
             throws SolrClientServiceException, SolrServerException, IOException {
         List<SiddhiSolrDocument> addDocs = new ArrayList<>();
         for (int index = 0; index < updateConditionParameterMaps.size(); index++) {
@@ -271,7 +271,7 @@ public class SolrTable extends AbstractRecordTable {
                 List<SiddhiSolrDocument> updateDocs = new ArrayList<>();
                 Map<String, Object> updateSetParameterMap = updateSetParameterMaps.get(index);
                 Map<String, Object> updateFields = new HashMap<>();
-                for (Map.Entry<String, CompiledExpression> entry : updateSet.getUpdateSetMap().entrySet()) {
+                for (Map.Entry<String, CompiledExpression> entry : updateSetCompiledExpressionMap.entrySet()) {
                     updateFields.put(entry.getKey(),
                             SolrTableUtils.resolveCondition((SolrCompiledCondition) entry.getValue(),
                                     updateSetParameterMap, collectionConfig.getCollectionName()));
@@ -339,12 +339,12 @@ public class SolrTable extends AbstractRecordTable {
     @Override
     protected void updateOrAdd(CompiledCondition updateCondition,
                                List<Map<String, Object>> updateConditionParameterMaps,
-                               RecordTableCompiledUpdateSet updateSet,
-                               List<Map<String, Object>> updateSetParameterMaps, List<Object[]> addingRecords)
-            throws ConnectionUnavailableException {
+                               Map<String, CompiledExpression> updateSetCompiledExpressionMap,
+                               List<Map<String, Object>> updateSetParameterMaps,
+                               List<Object[]> addingRecords) throws ConnectionUnavailableException {
         try {
             upsertSolrDocuments(updateConditionParameterMaps, updateCondition,
-                    updateSetParameterMaps, updateSet, addingRecords);
+                    updateSetParameterMaps, updateSetCompiledExpressionMap, addingRecords);
         } catch (SolrClientServiceException | SolrServerException | IOException | SolrException e) {
             log.error("Error while searching records for updating/adding: " + e.getMessage(), e);
         }
