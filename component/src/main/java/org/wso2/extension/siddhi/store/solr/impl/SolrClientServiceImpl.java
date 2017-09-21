@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.ConfigSetAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
@@ -121,7 +120,6 @@ public enum  SolrClientServiceImpl {
             }
             tableToConfigMapping.put(config.getCollectionName(), config);
             CloudSolrClient solrClient = new CloudSolrClient.Builder().withZkHost(config.getSolrServerUrl()).build();
-            solrClient.setParser(new XMLResponseParser());
             urlToSolrClientMapping.put(config.getSolrServerUrl(), new SiddhiSolrClient(config.getDomainName(),
                     solrClient));
             Integer count = urlToTableCountMapping.get(config.getSolrServerUrl());
