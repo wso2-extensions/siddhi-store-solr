@@ -105,6 +105,7 @@
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>${surefireArgLine} -ea -Xmx512m</argLine>
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
             </plugin>
             <plugin>
@@ -136,4 +137,87 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+    <profile>
+        <id>local-solr</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>start-docker-for-solr</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>start</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>stop-docker-for-solr</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>stop</goal>
+                                <goal>remove</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <images>
+                            <image>
+                                <name>dockerhub.private.wso2.com/gimantha-ubuntu_14.04_solr_6.2.1:1.5</name>
+                                <alias>sp-solr</alias>
+                                <run>
+                                    <namingStrategy>alias</namingStrategy>
+                                    <env>
+                                    </env>
+                                    <ports>
+                                        <port>${sp-solr.port}:9983</port>
+                                    </ports>
+                                    <wait>
+                                        <log>Recovery is complete. This is an informational message only. No user action is required.</log>
+                                        <time>60000</time>
+                                    </wait>
+                                </run>
+                            </image>
+                        </images>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.19.1</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test-for-solr</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify-for-solr</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <environmentVariables>
+                            <DATABASE_TYPE>MSSQL</DATABASE_TYPE>
+                            <DATABASE_USER>sa</DATABASE_USER>
+                            <DATABASE_PASSWORD>wso2das123#</DATABASE_PASSWORD>
+                            <PORT>${sp-solr.port}</PORT>
+                            <DOCKER_HOST_IP>${docker.container.sp-solr.ip}</DOCKER_HOST_IP>
+                        </environmentVariables>
+                        <suiteXmlFiles>
+                            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    </profiles>
 </project>

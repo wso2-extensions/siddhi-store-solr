@@ -49,6 +49,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void readEventsFromSolrEventTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -103,6 +104,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST4");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -111,6 +115,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void read1EventMatchingAValueFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -153,6 +158,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST5");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -161,6 +169,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void readEventsGreaterThanAValueFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -211,6 +220,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST6");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -219,6 +231,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void read1EventGreaterAValueAndMatchingOneValueFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -264,6 +277,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST7");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -272,6 +288,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void read1EventMatchingAllFieldsFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -317,6 +334,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST8");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -325,6 +345,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void read1EventWithMultipleOperatorsFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -370,6 +391,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST9");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -378,6 +402,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void readEventsWithMultipleOperatorsFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int);" +
                 "define stream BooStream (firstname string);" +
@@ -429,6 +454,9 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first3", "last3", 100});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST10");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -437,6 +465,7 @@ public class ReadFromSolrTableTestCase {
     @Test
     public void readEventsWithComplexConditionFromSolrTable() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int, school string, index int);" +
                 "define stream BooStream (firstname string);" +
@@ -493,23 +522,11 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first6", "last6", 56, "school6", 1006});
             Thread.sleep(1000);
             booStream.send(new Object[]{"first1"});
+            indexerService.deleteCollection("TEST10");
+        } catch (Exception e) {
+            //ignored
         } finally {
             siddhiAppRuntime.shutdown();
-        }
-    }
-
-    public static void deleteTables() throws Exception {
-        SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
-        try {
-            indexerService.deleteCollection("TEST4");
-            indexerService.deleteCollection("TEST5");
-            indexerService.deleteCollection("TEST6");
-            indexerService.deleteCollection("TEST7");
-            indexerService.deleteCollection("TEST8");
-            indexerService.deleteCollection("TEST9");
-            indexerService.deleteCollection("TEST10");
-        } finally {
-            indexerService.destroy();
         }
     }
 }
