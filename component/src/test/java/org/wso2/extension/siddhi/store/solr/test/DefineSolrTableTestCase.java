@@ -56,6 +56,7 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
+            indexerService.deleteCollection("TEST1");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
@@ -64,12 +65,26 @@ public class DefineSolrTableTestCase {
     }
 
     @Test
+    public void testDefineExistingSolrTable() {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', collection='TEST1', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
+                "define table Footable(time long, date string);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
+        indexerService = SolrClientServiceImpl.INSTANCE;
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
     public void testDefineSolrTable2() throws SolrClientServiceException, SolrSchemaNotFoundException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', zookeeper.url='localhost:3456', collection='TEST2', base" +
                 ".config='gettingstarted', " +
-                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='true') " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='false') " +
                 "define table Footable(time long, date string);";
 
         SiddhiAppRuntime runtime = siddhiManager.createSiddhiAppRuntime(defineQuery);
@@ -83,13 +98,115 @@ public class DefineSolrTableTestCase {
         }
     }
 
-    public static void deleteTables() throws Exception {
+    @Test
+    public void testDefineSolrTable3() {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', collection='XXX', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored') " +
+                "define table Footable(time long, date string);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
+        indexerService = SolrClientServiceImpl.INSTANCE;
         try {
-            indexerService.deleteCollection("TEST1");
+            Assert.assertTrue(indexerService.collectionExists("XXX"));
+            SolrSchema schema = indexerService.getSolrSchema("XXX");
+            SolrSchemaField field1 = schema.getField("time");
+            SolrSchemaField field2 = schema.getField("date");
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
+            indexerService.deleteCollection("XXX");
+        } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
+            Assert.fail(e.getMessage());
         } finally {
-            if (indexerService != null) {
-                indexerService.destroy();
-            }
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void testDefineSolrTable4() {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', collection='YYY', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='') " +
+                "define table Footable(time long, date string);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
+        indexerService = SolrClientServiceImpl.INSTANCE;
+        try {
+            Assert.assertTrue(indexerService.collectionExists("YYY"));
+            SolrSchema schema = indexerService.getSolrSchema("YYY");
+            SolrSchemaField field1 = schema.getField("time");
+            SolrSchemaField field2 = schema.getField("date");
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
+            indexerService.deleteCollection("YYY");
+        } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void testDefineSolrTable5() {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='false') " +
+                "define table Footable(time long, date string);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
+        indexerService = SolrClientServiceImpl.INSTANCE;
+        try {
+            Assert.assertTrue(indexerService.collectionExists("Footable"));
+            SolrSchema schema = indexerService.getSolrSchema("Footable");
+            SolrSchemaField field1 = schema.getField("time");
+            SolrSchemaField field2 = schema.getField("date");
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
+            indexerService.deleteCollection("Footable");
+        } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void testDefineSolrTable6() {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String defineQuery =
+                "@store(type='solr', collection='', base.config='gettingstarted', " +
+                "shards='2', replicas='2', schema ='time long stored, date string stored', commit.async='false') " +
+                "define table Footable2(time long, date string);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
+        siddhiAppRuntime.start();
+        indexerService = SolrClientServiceImpl.INSTANCE;
+        try {
+            Assert.assertTrue(indexerService.collectionExists("Footable2"));
+            SolrSchema schema = indexerService.getSolrSchema("Footable2");
+            SolrSchemaField field1 = schema.getField("time");
+            SolrSchemaField field2 = schema.getField("date");
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
+            Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
+            indexerService.deleteCollection("Footable2");
+        } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
         }
     }
 }

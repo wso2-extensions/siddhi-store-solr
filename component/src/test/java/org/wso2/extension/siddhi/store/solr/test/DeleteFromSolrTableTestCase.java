@@ -47,27 +47,6 @@ public class DeleteFromSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    public static void shutdown() throws SolrClientServiceException {
-        if (indexerService == null) {
-            throw new SolrClientServiceException("Indexer Service cannot be loaded!");
-        }
-        try {
-            indexerService.deleteCollection("TEST34");
-            indexerService.deleteCollection("TEST35");
-            indexerService.deleteCollection("TEST36");
-            indexerService.deleteCollection("TEST37");
-            indexerService.deleteCollection("TEST38");
-            indexerService.deleteCollection("TEST39");
-            indexerService.deleteCollection("TEST40");
-            indexerService.deleteCollection("TEST41");
-            indexerService.deleteCollection("TEST42");
-            indexerService.deleteCollection("TEST43");
-        } finally {
-            indexerService.destroy();
-        }
-        log.info("== Solr Table DELETE tests completed ==");
-    }
-
     private long getDocCount(String query, String collection)
             throws SolrClientServiceException, IOException, SolrServerException {
         SiddhiSolrClient client;
@@ -113,6 +92,7 @@ public class DeleteFromSolrTableTestCase {
 
             Assert.assertEquals(0, getDocCount("*:*", "TEST34"), "Deletion failed");
 
+            indexerService.deleteCollection("TEST34");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest1' ignored due to " + e.getMessage(), e);
@@ -155,6 +135,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(0, getDocCount("*:*", "TEST35"), "Deletion failed");
+            indexerService.deleteCollection("TEST35");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest2' ignored due to " + e.getMessage(), e);
@@ -196,6 +177,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST36"), "Deletion failed");
+            indexerService.deleteCollection("TEST36");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest3' ignored due to " + e.getMessage(), e);
@@ -236,6 +218,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST37"), "Deletion failed");
+            indexerService.deleteCollection("TEST37");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest4' ignored due to " + e.getMessage(), e);
@@ -262,7 +245,7 @@ public class DeleteFromSolrTableTestCase {
                            "@info(name = 'query2') " +
                            "from DeleteStockStream " +
                            "delete StockTable " +
-                           "   on 'IBM' == symbol  ;"; //TODO symbol is ambiguous
+                           "   on 'IBM' == StockTable.symbol  ;";
 
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -276,6 +259,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST38"), "Deletion failed");
+            indexerService.deleteCollection("TEST38");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest5' ignored due to " + e.getMessage(), e);
@@ -303,7 +287,7 @@ public class DeleteFromSolrTableTestCase {
                            "@info(name = 'query2') " +
                            "from DeleteStockStream " +
                            "delete StockTable " +
-                           "   on symbol == 'IBM'  ;"; //TODO seems symbol is ambiguous
+                           "   on StockTable.symbol == 'IBM'  ;";
 
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -317,6 +301,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST39"), "Deletion failed");
+            indexerService.deleteCollection("TEST39");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest6' ignored due to " + e.getMessage(), e);
@@ -359,6 +344,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST40"), "Deletion failed");
+            indexerService.deleteCollection("TEST40");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest7' ignored due to " + e.getMessage(), e);
@@ -400,6 +386,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(1, getDocCount("*:*", "TEST41"), "Deletion failed");
+            indexerService.deleteCollection("TEST41");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest8' ignored due to " + e.getMessage(), e);
@@ -441,6 +428,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(2, getDocCount("*:*", "TEST42"), "Deletion failed");
+            indexerService.deleteCollection("TEST42");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'deleteFromSolrTableTest10' ignored due to " + e.getMessage(), e);
@@ -484,6 +472,7 @@ public class DeleteFromSolrTableTestCase {
             Thread.sleep(1000);
 
             stockStream.send(new Object[]{null, 45.5F, 100L});
+            indexerService.deleteCollection("TEST43");
             siddhiAppRuntime.shutdown();
             Thread.sleep(1000);
             try {

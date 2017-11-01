@@ -63,29 +63,6 @@ public class UpdateSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    public static void shutdown() throws SolrClientServiceException {
-
-        if (indexerService == null) {
-            throw new SolrClientServiceException("Indexer Service cannot be loaded!");
-        }
-        try {
-            indexerService.deleteCollection("TEST11");
-            indexerService.deleteCollection("TEST12");
-            indexerService.deleteCollection("TEST13");
-            indexerService.deleteCollection("TEST14");
-            indexerService.deleteCollection("TEST15");
-            indexerService.deleteCollection("TEST16");
-            indexerService.deleteCollection("TEST17");
-            indexerService.deleteCollection("TEST18");
-            indexerService.deleteCollection("TEST19");
-            indexerService.deleteCollection("TEST20");
-            indexerService.deleteCollection("TEST21");
-        } finally {
-            indexerService.destroy();
-        }
-        log.info("== Solr Table UPDATE tests completed ==");
-    }
-
     private long getDocCount(String query, String collection)
             throws SolrClientServiceException, IOException, SolrServerException {
         SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(collection);
@@ -129,6 +106,7 @@ public class UpdateSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(3, getDocCount("*:*", "TEST13"));
+            indexerService.deleteCollection("TEST13");
             siddhiAppRuntime.shutdown();
 
         } catch (SolrClientServiceException | SolrServerException | IOException e) {
@@ -170,13 +148,15 @@ public class UpdateSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(3, getDocCount("*:*", "TEST14"));
+            indexerService.deleteCollection("TEST14");
+            siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.error("Test case 'updateFromTableTest2' ignored due to " + e.getMessage(), e);
         }
     }
 
     @Test
-    public void updateFromTableTest3() throws InterruptedException {
+    public void updateFromTableTest3() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest3");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -223,11 +203,12 @@ public class UpdateSolrTableTestCase {
         Thread.sleep(1000);
         Assert.assertEquals(3, inEventCount);
         Assert.assertEquals(true, eventArrived);
+        indexerService.deleteCollection("TEST15");
         siddhiAppRuntime.shutdown();
     }
 
     @Test
-    public void updateFromTableTest4() throws InterruptedException {
+    public void updateFromTableTest4() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest4");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -275,12 +256,13 @@ public class UpdateSolrTableTestCase {
 
         Assert.assertEquals(3, inEventCount);
         Assert.assertEquals(true, eventArrived);
+        indexerService.deleteCollection("TEST16");
         siddhiAppRuntime.shutdown();
     }
 
 
     @Test
-    public void updateFromTableTest5() throws InterruptedException {
+    public void updateFromTableTest5() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest5");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -328,11 +310,12 @@ public class UpdateSolrTableTestCase {
 
         Assert.assertEquals(2, inEventCount);
         Assert.assertEquals(true, eventArrived);
+        indexerService.deleteCollection("TEST17");
         siddhiAppRuntime.shutdown();
     }
 
     @Test
-    public void updateFromTableTest6() throws InterruptedException {
+    public void updateFromTableTest6() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest6");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -380,12 +363,13 @@ public class UpdateSolrTableTestCase {
 
         Assert.assertEquals(3, inEventCount);
         Assert.assertEquals(true, eventArrived);
+        indexerService.deleteCollection("TEST18");
         siddhiAppRuntime.shutdown();
     }
 
 
     @Test
-    public void updateFromTableTest7() throws InterruptedException {
+    public void updateFromTableTest7() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest7");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -459,6 +443,7 @@ public class UpdateSolrTableTestCase {
         Assert.assertEquals(2, inEventCount);
         Assert.assertEquals(0, removeEventCount);
         Assert.assertEquals(true, eventArrived);
+        indexerService.deleteCollection("TEST19");
         siddhiAppRuntime.shutdown();
     }
 
@@ -496,6 +481,7 @@ public class UpdateSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(3, getDocCount("*:*", "TEST20"));
+            indexerService.deleteCollection("TEST20");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.error("Test case 'updateFromTableTest8' ignored due to " + e.getMessage(), e);
@@ -536,6 +522,7 @@ public class UpdateSolrTableTestCase {
             Thread.sleep(1000);
 
             Assert.assertEquals(3, getDocCount("*:*", "TEST21"));
+            indexerService.deleteCollection("TEST21");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateFromTableTest8' ignored due to " + e.getMessage(), e);
@@ -579,6 +566,7 @@ public class UpdateSolrTableTestCase {
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST11", solrQuery).getResults().getNumFound();
             Assert.assertEquals(3, noOfDocs);
+            indexerService.deleteCollection("TEST11");
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -636,6 +624,7 @@ public class UpdateSolrTableTestCase {
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST12", solrQuery).getResults().getNumFound();
             Assert.assertEquals(16, noOfDocs);
+            indexerService.deleteCollection("TEST12");
         } finally {
             siddhiAppRuntime.shutdown();
         }
