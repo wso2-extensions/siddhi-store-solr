@@ -148,8 +148,8 @@ public class SolrTableUtils {
             String namePlaceholder = Pattern.quote("[" + name + "]");
             condition = condition.replaceAll(namePlaceholder, value.toString());
         }
-        //set solr "select all" query if condition is "true"
-        if (condition.equalsIgnoreCase("\"" + Boolean.TRUE.toString() + "\"")) {
+        //set solr "select all" query if condition is not provided
+        if (condition == null || condition.isEmpty()) {
             condition = "*:*";
         }
         if (log.isDebugEnabled()) {
