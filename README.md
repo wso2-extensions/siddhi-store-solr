@@ -12,7 +12,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr/api/1.0.9">1.0.9</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr/api/1.0.10">1.0.10</a>.
 
 ## Prerequisites
  - A Default configset needs to be uploaded to the zookeper of SolrCloud (If you test in your local machine, you can
@@ -50,7 +50,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr/api/1.0.9/#solr-store">solr</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>)*<br><div style="padding-left: 1em;"><p>Solr store implementation uses solr collections for underlying data storage. The events are converted to Solr documents when the events are inserted to solr store. Solr documents are converted to Events when the Solr documents are read from solr collections. This can only be used with the Solr cloud mode.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr/api/1.0.10/#solr-store">solr</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>)*<br><div style="padding-left: 1em;"><p>Solr store implementation uses solr collections for underlying data storage. The events are converted to Solr documents when the events are inserted to solr store. Solr documents are converted to Events when the Solr documents are read from solr collections. This can only be used with the Solr cloud mode.</p></div>
 
 ## How to Contribute
  
