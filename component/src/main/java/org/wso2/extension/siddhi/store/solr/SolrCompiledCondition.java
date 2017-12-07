@@ -31,7 +31,7 @@ public class SolrCompiledCondition implements CompiledCondition {
     }
 
     @Override
-    public CompiledCondition cloneCompiledCondition(String key) {
+    public CompiledCondition cloneCompilation(String key) {
         return null;
     }
 
