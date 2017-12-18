@@ -22,9 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.awaitility.Duration;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.impl.SiddhiSolrClient;
@@ -44,18 +45,8 @@ import java.sql.SQLException;
  */
 public class UpdateSolrTableTestCase {
     private static final Log log = LogFactory.getLog(UpdateSolrTableTestCase.class);
-    private int inEventCount;
-    private int removeEventCount;
-    private boolean eventArrived;
     private static SolrClientServiceImpl indexerService;
 
-
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
 
     @BeforeClass
     public static void startTest() {
@@ -63,13 +54,12 @@ public class UpdateSolrTableTestCase {
         indexerService = SolrClientServiceImpl.INSTANCE;
     }
 
-    private long getDocCount(String query, String collection)
+    private long getDocCount(String collection)
             throws SolrClientServiceException, IOException, SolrServerException {
         SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection(collection);
-        SolrQuery solrQuery = new SolrQuery(query);
+        SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setRows(0);
-        long noOfDocs = client.query(collection, solrQuery).getResults().getNumFound();
-        return noOfDocs;
+        return client.query(collection, solrQuery).getResults().getNumFound();
     }
 
     @Test
@@ -102,13 +92,11 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST13", Duration.FIVE_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(3, getDocCount("*:*", "TEST13"));
+            AssertJUnit.assertEquals(3, getDocCount("TEST13"));
             indexerService.deleteCollection("TEST13");
             siddhiAppRuntime.shutdown();
-
         } catch (SolrClientServiceException | SolrServerException | IOException e) {
             log.error("Test case 'updateFromTableTest1' ignored due to " + e.getMessage(), e);
         }
@@ -144,10 +132,9 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST14", Duration.FIVE_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(3, getDocCount("*:*", "TEST14"));
+            AssertJUnit.assertEquals(3, getDocCount("TEST14"));
             indexerService.deleteCollection("TEST14");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -158,6 +145,7 @@ public class UpdateSolrTableTestCase {
     @Test
     public void updateFromTableTest3() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest3");
+        final int[] inEventCount = {0};
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                          "define stream StockStream (symbol string, price float, volume long); " +
@@ -176,40 +164,42 @@ public class UpdateSolrTableTestCase {
                        "insert into OutStream;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        inEventCount++;
-                    }
-                    eventArrived = true;
-                }
-
-            }
-
-        });
+        checkReceivedEvents(inEventCount, siddhiAppRuntime);
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 55.6f, 100L});
+        SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST15", Duration.ONE_MINUTE);
         checkStockStream.send(new Object[]{"IBM", 100L});
         checkStockStream.send(new Object[]{"WSO2", 100L});
         checkStockStream.send(new Object[]{"IBM", 100L});
-        Thread.sleep(1000);
-        Assert.assertEquals(3, inEventCount);
-        Assert.assertEquals(true, eventArrived);
+        SolrTestUtils.waitTillVariableCountMatches(inEventCount[0], 3, Duration.ONE_MINUTE);
+        AssertJUnit.assertEquals(3, inEventCount[0]);
         indexerService.deleteCollection("TEST15");
         siddhiAppRuntime.shutdown();
+    }
+
+    private void checkReceivedEvents(int[] inEventCount, SiddhiAppRuntime siddhiAppRuntime) {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event ignored : inEvents) {
+                        inEventCount[0]++;
+                    }
+                }
+            }
+
+        });
     }
 
     @Test
     public void updateFromTableTest4() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest4");
+        final int[] inEventCount = {0};
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                          "define stream StockStream (symbol string, price float, volume long); " +
@@ -228,20 +218,7 @@ public class UpdateSolrTableTestCase {
                        "insert into OutStream;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        inEventCount++;
-                    }
-                    eventArrived = true;
-                }
-
-            }
-
-        });
+        checkOutputEvents(inEventCount, siddhiAppRuntime);
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
@@ -249,21 +226,24 @@ public class UpdateSolrTableTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 55.6f, 100L});
+        SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST16", Duration.ONE_MINUTE);
         checkStockStream.send(new Object[]{"IBM", 100L});
         checkStockStream.send(new Object[]{"WSO2", 100L});
         checkStockStream.send(new Object[]{"IBM", 100L});
-        Thread.sleep(1000);
-
-        Assert.assertEquals(3, inEventCount);
-        Assert.assertEquals(true, eventArrived);
+        SolrTestUtils.waitTillVariableCountMatches(inEventCount[0], 3, Duration.ONE_MINUTE);
         indexerService.deleteCollection("TEST16");
         siddhiAppRuntime.shutdown();
+    }
+
+    private void checkOutputEvents(int[] inEventCount, SiddhiAppRuntime siddhiAppRuntime) {
+        checkReceivedEvents(inEventCount, siddhiAppRuntime);
     }
 
 
     @Test
     public void updateFromTableTest5() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest5");
+        final int[] inEventCount = {0};
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                          "define stream StockStream (symbol string, price float, volume long); " +
@@ -282,20 +262,7 @@ public class UpdateSolrTableTestCase {
                        "insert into OutStream;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        inEventCount++;
-                    }
-                    eventArrived = true;
-                }
-
-            }
-
-        });
+        checkOutputEvents(inEventCount, siddhiAppRuntime);
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
@@ -303,13 +270,12 @@ public class UpdateSolrTableTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 55.6f, 100L});
+        SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST17", Duration.FIVE_SECONDS);
         checkStockStream.send(new Object[]{"BSD", 100L});
         checkStockStream.send(new Object[]{"WSO2", 100L});
         checkStockStream.send(new Object[]{"IBM", 100L});
-        Thread.sleep(1000);
-
-        Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(true, eventArrived);
+        SolrTestUtils.waitTillVariableCountMatches(inEventCount[0], 2, Duration.FIVE_SECONDS);
+        AssertJUnit.assertEquals(2, inEventCount[0]);
         indexerService.deleteCollection("TEST17");
         siddhiAppRuntime.shutdown();
     }
@@ -317,6 +283,7 @@ public class UpdateSolrTableTestCase {
     @Test
     public void updateFromTableTest6() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest6");
+        final int[] inEventCount = {0};
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                          "define stream StockStream (symbol string, price float, volume long); " +
@@ -335,20 +302,7 @@ public class UpdateSolrTableTestCase {
                        "insert into OutStream;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        inEventCount++;
-                    }
-                    eventArrived = true;
-                }
-
-            }
-
-        });
+        checkOutputEvents(inEventCount, siddhiAppRuntime);
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
@@ -356,13 +310,12 @@ public class UpdateSolrTableTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 55.6f, 100L});
+        SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST18", Duration.FIVE_SECONDS);
         checkStockStream.send(new Object[]{"IBM", 100L});
         checkStockStream.send(new Object[]{"WSO2", 100L});
         checkStockStream.send(new Object[]{"IBM", 100L});
-        Thread.sleep(1000);
-
-        Assert.assertEquals(3, inEventCount);
-        Assert.assertEquals(true, eventArrived);
+        SolrTestUtils.waitTillVariableCountMatches(inEventCount[0], 3, Duration.FIVE_SECONDS);
+        AssertJUnit.assertEquals(3, inEventCount[0]);
         indexerService.deleteCollection("TEST18");
         siddhiAppRuntime.shutdown();
     }
@@ -371,6 +324,7 @@ public class UpdateSolrTableTestCase {
     @Test
     public void updateFromTableTest7() throws InterruptedException, SolrClientServiceException {
         log.info("updateFromTableTest7");
+        final int[] inEventCount = {0};
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                          "define stream StockStream (symbol string, price float, volume long); " +
@@ -404,47 +358,43 @@ public class UpdateSolrTableTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     for (Event event : inEvents) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        inEventCount[0]++;
+                        switch (inEventCount[0]) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"IBM", 150.6f, 100L}, event.getData());
+                                Assert.assertEquals(event.getData(), new Object[]{"IBM", 150.6f, 100L});
                                 break;
                             case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 190.6f, 100L}, event.getData());
+                                Assert.assertEquals(event.getData(), new Object[]{"IBM", 190.6f, 100L});
                                 break;
                             default:
-                                Assert.assertSame(2, inEventCount);
+                                AssertJUnit.assertSame(2, inEventCount[0]);
                         }
                     }
-                    eventArrived = true;
                 }
-                if (removeEvents != null) {
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
             }
-
         });
 
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
-        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
-        siddhiAppRuntime.start();
+        try {
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
-        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-        stockStream.send(new Object[]{"IBM", 185.6f, 100L});
-        checkStockStream.send(new Object[]{"IBM", 150.6f, 100L});
-        checkStockStream.send(new Object[]{"WSO2", 175.6f, 100L});
-        updateStockStream.send(new Object[]{"IBM", 200f, 100L});
-        checkStockStream.send(new Object[]{"IBM", 190.6f, 100L});
-        checkStockStream.send(new Object[]{"WSO2", 155.6f, 100L});
-        Thread.sleep(2000);
-
-        Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(0, removeEventCount);
-        Assert.assertEquals(true, eventArrived);
-        indexerService.deleteCollection("TEST19");
-        siddhiAppRuntime.shutdown();
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 185.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST19", Duration.FIVE_SECONDS);
+            checkStockStream.send(new Object[]{"IBM", 150.6f, 100L});
+            checkStockStream.send(new Object[]{"WSO2", 175.6f, 100L});
+            updateStockStream.send(new Object[]{"IBM", 200f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, "price:200", 1, "TEST19",
+                    Duration.ONE_MINUTE);
+            checkStockStream.send(new Object[]{"IBM", 190.6f, 100L});
+            checkStockStream.send(new Object[]{"WSO2", 155.6f, 100L});
+            AssertJUnit.assertEquals(2, inEventCount[0]);
+        } finally {
+            indexerService.deleteCollection("TEST19");
+            siddhiAppRuntime.shutdown();
+        }
     }
 
     @Test
@@ -477,10 +427,10 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST20", Duration.FIVE_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(3, getDocCount("*:*", "TEST20"));
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST20", Duration.FIVE_SECONDS);
+            AssertJUnit.assertEquals(3, getDocCount("TEST20"));
             indexerService.deleteCollection("TEST20");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -518,10 +468,11 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST21", Duration.FIVE_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST21", Duration.FIVE_SECONDS);
 
-            Assert.assertEquals(3, getDocCount("*:*", "TEST21"));
+            AssertJUnit.assertEquals(3, getDocCount("TEST21"));
             indexerService.deleteCollection("TEST21");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -559,15 +510,16 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST11", Duration.FIVE_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST11", Duration.FIVE_SECONDS);
             SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection("TEST11");
             SolrQuery solrQuery = new SolrQuery("*:*");
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST11", solrQuery).getResults().getNumFound();
-            Assert.assertEquals(3, noOfDocs);
-            indexerService.deleteCollection("TEST11");
+            AssertJUnit.assertEquals(3, noOfDocs);
         } finally {
+            indexerService.deleteCollection("TEST11");
             siddhiAppRuntime.shutdown();
         }
     }
@@ -599,6 +551,7 @@ public class UpdateSolrTableTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         try {
             siddhiAppRuntime.start();
+            SolrTestUtils.waitTillSolrCollection(indexerService, "TEST12", Duration.TEN_SECONDS);
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
@@ -617,15 +570,17 @@ public class UpdateSolrTableTestCase {
             stockStream.send(new Object[]{"IBM", 100.6f, 200L});
             stockStream.send(new Object[]{"IBM", 100.6f, 200L});
             stockStream.send(new Object[]{"IBM", 100.6f, 200L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 18, "TEST12", Duration.TEN_SECONDS);
             updateStockStream.send(new Object[]{"IBM", 00.6f, 100L});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, "price:\"0.6\"", 16, "TEST12",
+                    Duration.TEN_SECONDS);
             SiddhiSolrClient client = indexerService.getSolrServiceClientByCollection("TEST12");
             SolrQuery solrQuery = new SolrQuery("price:\"0.6\"");
             solrQuery.setRows(0);
             long noOfDocs = client.query("TEST12", solrQuery).getResults().getNumFound();
-            Assert.assertEquals(16, noOfDocs);
-            indexerService.deleteCollection("TEST12");
+            Assert.assertEquals(noOfDocs, 16);
         } finally {
+            indexerService.deleteCollection("TEST12");
             siddhiAppRuntime.shutdown();
         }
     }

@@ -91,7 +91,7 @@ public class CarbonIndexerServiceTestCase {
     @Test(dependsOnMethods = "step4_testNonExistingIndexSchema")
     public void step5_testInitialIndexSchema() throws SolrClientServiceException, SolrSchemaNotFoundException {
         SolrSchema indexSchema = indexerService.getSolrSchema(TABLE_T1);
-        Assert.assertEquals("id", indexSchema.getUniqueKey());
+        Assert.assertEquals(indexSchema.getUniqueKey(), "id");
     }
 
     @Test(dependsOnMethods = "step5_testInitialIndexSchema")

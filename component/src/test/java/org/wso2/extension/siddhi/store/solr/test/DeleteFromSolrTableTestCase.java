@@ -20,19 +20,14 @@ package org.wso2.extension.siddhi.store.solr.test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
+import org.awaitility.Duration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
-import org.wso2.extension.siddhi.store.solr.impl.SiddhiSolrClient;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-
-import java.io.IOException;
 
 /**
  * This class represents the tests related to delete queries in Solr Store implementation
@@ -45,15 +40,6 @@ public class DeleteFromSolrTableTestCase {
     public static void startTest() {
         log.info("== Solr Table DELETE tests started ==");
         indexerService = SolrClientServiceImpl.INSTANCE;
-    }
-
-    private long getDocCount(String query, String collection)
-            throws SolrClientServiceException, IOException, SolrServerException {
-        SiddhiSolrClient client;
-        client = indexerService.getSolrServiceClientByCollection(collection);
-        SolrQuery solrQuery = new SolrQuery(query);
-        solrQuery.setRows(0);
-        return client.query(collection, solrQuery).getResults().getNumFound();
     }
 
     @Test
@@ -86,11 +72,13 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST34", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(0, getDocCount("*:*", "TEST34"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService,
+                                                                                 "TEST34"), 0, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST34"), 0 ,
+                                "Deletion failed");
 
             indexerService.deleteCollection("TEST34");
             siddhiAppRuntime.shutdown();
@@ -130,11 +118,13 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST35", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(0, getDocCount("*:*", "TEST35"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService,
+                                                                                 "TEST35"), 0, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST35"),
+                                0, "Deletion failed");
             indexerService.deleteCollection("TEST35");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -172,11 +162,13 @@ public class DeleteFromSolrTableTestCase {
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 2, "TEST36", Duration.FIVE_SECONDS);
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST36"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService,
+                                                                                 "TEST36"), 2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST36"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST36");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -214,10 +206,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST37", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST37"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService,
+                                                                                 "TEST37"), 2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST37"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST37");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -255,10 +249,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST38", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST38"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService,
+                                                                                 "TEST38"), 2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST38"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST38");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -297,10 +293,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST39", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST39"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService, "TEST39"),
+                                                       2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST39"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST39");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -340,10 +338,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"IBM", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST40", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST40"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService, "TEST40"),
+                                                       2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST40"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST40");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -382,10 +382,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"IBM", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST41", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(1, getDocCount("*:*", "TEST41"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService, "TEST41"),
+                                                       1, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST41"),
+                                1, "Deletion failed");
             indexerService.deleteCollection("TEST41");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -424,10 +426,12 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST42", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST42"), "Deletion failed");
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService, "TEST42"),
+                                                       2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST42"),
+                                2, "Deletion failed");
             indexerService.deleteCollection("TEST42");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -465,16 +469,15 @@ public class DeleteFromSolrTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST43", Duration.FIVE_SECONDS);
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            Assert.assertEquals(2, getDocCount("*:*", "TEST43"), "Deletion failed");
-            Thread.sleep(1000);
-
+            SolrTestUtils.waitTillVariableCountMatches(SolrTestUtils.getDocCount(indexerService, "TEST43"),
+                                                       2, Duration.FIVE_SECONDS);
+            Assert.assertEquals(SolrTestUtils.getDocCount(indexerService, "TEST43"),
+                                2, "Deletion failed");
             stockStream.send(new Object[]{null, 45.5F, 100L});
             indexerService.deleteCollection("TEST43");
             siddhiAppRuntime.shutdown();
-            Thread.sleep(1000);
             try {
                 siddhiManager.createSiddhiAppRuntime(streams + query);
             } catch (NullPointerException ex) {

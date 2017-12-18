@@ -19,6 +19,7 @@
 package org.wso2.extension.siddhi.store.solr.test;
 
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -29,7 +30,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
  */
 public class InsertToSolrTableTestCase {
     @Test
-    public void insertEventsToSolrEventTable() throws InterruptedException {
+    public void insertEventsToSolrEventTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -49,16 +50,16 @@ public class InsertToSolrTableTestCase {
             fooTable.send(new Object[]{45324211L, "1970-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MIN_VALUE, "2016-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MAX_VALUE, "2005-03-01 23:34:34 456"});
-            indexerService.deleteCollection("TEST2");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST2");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void insertEventsToSolrEventTableWithPrimaryKeys() throws InterruptedException {
+    public void insertEventsToSolrEventTableWithPrimaryKeys() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -76,21 +77,26 @@ public class InsertToSolrTableTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        simulateEvents(indexerService, siddhiAppRuntime, fooStream);
+    }
+
+    private void simulateEvents(SolrClientServiceImpl indexerService, SiddhiAppRuntime siddhiAppRuntime,
+                                InputHandler fooStream) throws SolrClientServiceException {
         try {
             siddhiAppRuntime.start();
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first1", "last1", 100});
-            indexerService.deleteCollection("TEST3");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST3");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void insertEventsToSolrEventTableWithPrimaryKeys2() throws InterruptedException {
+    public void insertEventsToSolrEventTableWithPrimaryKeys2() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -108,21 +114,11 @@ public class InsertToSolrTableTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
-        try {
-            siddhiAppRuntime.start();
-            fooStream.send(new Object[]{"first1", "last1", 23});
-            fooStream.send(new Object[]{"first2", "last2", 45});
-            fooStream.send(new Object[]{"first1", "last1", 100});
-            indexerService.deleteCollection("TEST3");
-        } catch (Exception e) {
-            //ignored
-        } finally {
-            siddhiAppRuntime.shutdown();
-        }
+        simulateEvents(indexerService, siddhiAppRuntime, fooStream);
     }
 
     @Test
-    public void insertEventsToSolrEventTableNoCommitAsync() throws InterruptedException {
+    public void insertEventsToSolrEventTableNoCommitAsync() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -137,21 +133,26 @@ public class InsertToSolrTableTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
         InputHandler fooTable = siddhiAppRuntime.getInputHandler("FooStream");
+        simulateEvents2(indexerService, siddhiAppRuntime, fooTable);
+    }
+
+    private void simulateEvents2(SolrClientServiceImpl indexerService, SiddhiAppRuntime siddhiAppRuntime,
+                                 InputHandler fooTable) throws SolrClientServiceException {
         try {
             siddhiAppRuntime.start();
             fooTable.send(new Object[]{45324211L, "1970-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MIN_VALUE, "2016-03-01 23:34:34 456"});
             fooTable.send(new Object[]{Long.MAX_VALUE, "2005-03-01 23:34:34 456"});
-            indexerService.deleteCollection("X");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("X");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void insertEventsToSolrEventTableNoCommitAsync2() throws InterruptedException {
+    public void insertEventsToSolrEventTableNoCommitAsync2() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -166,16 +167,6 @@ public class InsertToSolrTableTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery + insertQuery);
         InputHandler fooTable = siddhiAppRuntime.getInputHandler("FooStream");
-        try {
-            siddhiAppRuntime.start();
-            fooTable.send(new Object[]{45324211L, "1970-03-01 23:34:34 456"});
-            fooTable.send(new Object[]{Long.MIN_VALUE, "2016-03-01 23:34:34 456"});
-            fooTable.send(new Object[]{Long.MAX_VALUE, "2005-03-01 23:34:34 456"});
-            indexerService.deleteCollection("X");
-        } catch (Exception e) {
-            //ignored
-        } finally {
-            siddhiAppRuntime.shutdown();
-        }
+        simulateEvents2(indexerService, siddhiAppRuntime, fooTable);
     }
 }
