@@ -78,26 +78,25 @@ public class SolrRecordIterator implements RecordIterator<Object[]> {
                         if (solrDocuments.size() < batchSize) {
                             return false;
                         } else {
-                            query.setStart(start);
-                            query.setRows(count);
-                            start += count;
-                            solrDocuments = solrClient.query(solrCollection, query).getResults();
-                            solrDocumentIterator = solrDocuments.iterator();
-                            return hasNext();
+                            return readBatches();
                         }
                     }
                 } else {
-                    query.setStart(start);
-                    query.setRows(count);
-                    start += count;
-                    solrDocuments = solrClient.query(solrCollection, query).getResults();
-                    solrDocumentIterator = solrDocuments.iterator();
-                    return hasNext();
+                    return readBatches();
                 }
             } catch (SolrServerException | IOException | SolrException e) {
                 throw new SolrIteratorException("Error while calling hasNext(): " + e.getMessage(), e);
             }
         }
+    }
+
+    private boolean readBatches() throws SolrServerException, IOException {
+        query.setStart(start);
+        query.setRows(count);
+        start += count;
+        solrDocuments = solrClient.query(solrCollection, query).getResults();
+        solrDocumentIterator = solrDocuments.iterator();
+        return hasNext();
     }
 
     @Override

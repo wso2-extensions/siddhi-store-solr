@@ -162,36 +162,7 @@ public class UpdateOrInsertSolrTableTestCase {
                            "insert into OutStream;";
 
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                    if (inEvents != null) {
-                        for (Event event : inEvents) {
-                            inEventCount++;
-                            switch (inEventCount) {
-                                case 1:
-                                    Assert.assertEquals(new Object[]{"IBM", 100L}, event.getData());
-                                    break;
-                                case 2:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
-                                    break;
-                                case 3:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
-                                    break;
-                                default:
-                                    Assert.assertSame(3, inEventCount);
-                            }
-                        }
-                        eventArrived = true;
-                    }
-                    if (removeEvents != null) {
-                        removeEventCount = removeEventCount + removeEvents.length;
-                    }
-                    eventArrived = true;
-                }
-
-            });
+            checkForOutputEvents(siddhiAppRuntime);
 
             InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
             InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
@@ -207,14 +178,47 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L});
             Thread.sleep(500);
 
-            Assert.assertEquals(3, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 3);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST24");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
             log.info("Test case 'updateOrInsertTableTest3' ignored due to " + e.getMessage(), e);
         }
+    }
+
+    private void checkForOutputEvents(SiddhiAppRuntime siddhiAppRuntime) {
+        siddhiAppRuntime.addCallback("query3", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"IBM", 100L});
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2", 100L});
+                                break;
+                            case 3:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2", 100L});
+                                break;
+                            default:
+                                Assert.assertSame(inEventCount, 3);
+                        }
+                    }
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
     }
 
     @Test
@@ -241,35 +245,7 @@ public class UpdateOrInsertSolrTableTestCase {
                            "insert into OutStream;";
 
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.addCallback("query3", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                    if (inEvents != null) {
-                        for (Event event : inEvents) {
-                            inEventCount++;
-                            switch (inEventCount) {
-                                case 1:
-                                    Assert.assertEquals(new Object[]{"IBM", 100L}, event.getData());
-                                    break;
-                                case 2:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
-                                    break;
-                                case 3:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
-                                    break;
-                                default:
-                                    Assert.assertSame(3, inEventCount);
-                            }
-                        }
-                        eventArrived = true;
-                    }
-                    if (removeEvents != null) {
-                        removeEventCount = removeEventCount + removeEvents.length;
-                    }
-                    eventArrived = true;
-                }
-            });
+            checkForOutputEvents(siddhiAppRuntime);
 
             InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
             InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
@@ -284,9 +260,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L});
             Thread.sleep(500);
 
-            Assert.assertEquals(3, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 3);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST25");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -343,9 +319,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L});
             Thread.sleep(500);
 
-            Assert.assertEquals(0, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(false, eventArrived);
+            Assert.assertEquals(inEventCount, 0);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, false);
             indexerService.deleteCollection("TEST26");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -394,24 +370,14 @@ public class UpdateOrInsertSolrTableTestCase {
                             inEventCount++;
                             switch (inEventCount) {
                                 case 1:
-                                    Assert.assertEquals(new Object[]{"IBM", 100L}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"IBM", 100L});
                                     break;
                                 case 2:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"WSO2", 100L});
                                     break;
-                                case 3:
-                                    Assert.assertEquals(new Object[]{"WSO2", 100L}, event.getData());
-                                    break;
-                                default:
-                                    Assert.assertSame(3, inEventCount);
                             }
                         }
-                        eventArrived = true;
                     }
-                    if (removeEvents != null) {
-                        removeEventCount = removeEventCount + removeEvents.length;
-                    }
-                    eventArrived = true;
                 }
             });
 
@@ -429,10 +395,6 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"IBM", 100L});
             checkStockStream.send(new Object[]{"WSO2", 100L});
             Thread.sleep(500);
-
-            Assert.assertEquals(3, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
             indexerService.deleteCollection("TEST27");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -480,13 +442,13 @@ public class UpdateOrInsertSolrTableTestCase {
                             inEventCount++;
                             switch (inEventCount) {
                                 case 1:
-                                    Assert.assertEquals(new Object[]{"IBM", 100L, 56.6f}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"IBM", 100L, 56.6f});
                                     break;
                                 case 2:
-                                    Assert.assertEquals(new Object[]{"IBM", 200L, 0f}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"IBM", 200L, 0f});
                                     break;
                                 default:
-                                    Assert.assertSame(2, inEventCount);
+                                    Assert.assertSame(inEventCount, 2);
                             }
                         }
                         eventArrived = true;
@@ -512,9 +474,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L, 155.6f});
             Thread.sleep(2000);
 
-            Assert.assertEquals(2, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 2);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST28");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -556,13 +518,13 @@ public class UpdateOrInsertSolrTableTestCase {
                             inEventCount++;
                             switch (inEventCount) {
                                 case 1:
-                                    Assert.assertEquals(new Object[]{"IBM", 100L, 55.6f}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"IBM", 100L, 55.6f});
                                     break;
                                 case 2:
-                                    Assert.assertEquals(new Object[]{"IBM", 200L, 55.6f}, event.getData());
+                                    Assert.assertEquals(event.getData(), new Object[]{"IBM", 200L, 55.6f});
                                     break;
                                 default:
-                                    Assert.assertSame(2, inEventCount);
+                                    Assert.assertSame(inEventCount, 2);
                             }
                         }
                         eventArrived = true;
@@ -587,9 +549,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L, 155.6f});
             Thread.sleep(500);
 
-            Assert.assertEquals(2, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 2);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST29");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -644,7 +606,7 @@ public class UpdateOrInsertSolrTableTestCase {
                                     Assert.assertEquals(new Object[]{"IBM", 200L, 55.6f}, event.getData());
                                     break;
                                 default:
-                                    Assert.assertSame(2, inEventCount);
+                                    Assert.assertSame(inEventCount, 2);
                             }
                         }
                         eventArrived = true;
@@ -670,9 +632,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 100L, 155.6f});
             Thread.sleep(1000);
 
-            Assert.assertEquals(2, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 2);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST30");
             siddhiAppRuntime.shutdown();
 
@@ -727,7 +689,7 @@ public class UpdateOrInsertSolrTableTestCase {
                                     Assert.assertEquals(new Object[]{"WSO2", 300L, 4.6f}, event.getData());
                                     break;
                                 default:
-                                    Assert.assertSame(2, inEventCount);
+                                    Assert.assertSame(inEventCount, 2);
                             }
                         }
                         eventArrived = true;
@@ -753,9 +715,9 @@ public class UpdateOrInsertSolrTableTestCase {
             checkStockStream.send(new Object[]{"WSO2", 300L, 4.6f});
             Thread.sleep(1000);
 
-            Assert.assertEquals(2, inEventCount);
-            Assert.assertEquals(0, removeEventCount);
-            Assert.assertEquals(true, eventArrived);
+            Assert.assertEquals(inEventCount, 2);
+            Assert.assertEquals(removeEventCount, 0);
+            Assert.assertEquals(eventArrived, true);
             indexerService.deleteCollection("TEST31");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -797,7 +759,7 @@ public class UpdateOrInsertSolrTableTestCase {
             Thread.sleep(500);
 
             long docCount = getDocCount("*:*", "TEST32");
-            Assert.assertEquals(3, docCount);
+            Assert.assertEquals(docCount, 3);
             indexerService.deleteCollection("TEST32");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {
@@ -838,7 +800,7 @@ public class UpdateOrInsertSolrTableTestCase {
             updateStockStream.send(new Object[]{"GOOG", 10.6F, 200L});
             Thread.sleep(500);
 
-            Assert.assertEquals(4, getDocCount("*:*", "TEST33"));
+            Assert.assertEquals(getDocCount("*:*", "TEST33"), 4);
             indexerService.deleteCollection("TEST33");
             siddhiAppRuntime.shutdown();
         } catch (Exception e) {

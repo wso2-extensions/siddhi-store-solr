@@ -18,9 +18,10 @@
 
 package org.wso2.extension.siddhi.store.solr.test;
 
+import org.awaitility.Duration;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -35,19 +36,9 @@ import java.util.Arrays;
  * This class contains the tests related to reading from a solr event table
  */
 public class ReadFromSolrTableTestCase {
-    private int inEventCount;
-
-    @BeforeClass
-    public void init() {
-        resetVariables();
-    }
-
-    private void resetVariables() {
-        inEventCount = 0;
-    }
 
     @Test
-    public void readEventsFromSolrEventTable() throws InterruptedException {
+    public void readEventsFromSolrEventTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -78,6 +69,7 @@ public class ReadFromSolrTableTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
+                    int inEventCount = 0;
                     for (Event event : inEvents) {
                         if (Arrays.equals(new Object[]{"first1", "first1", 23}, event.getData())) {
                             inEventCount++;
@@ -89,8 +81,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals(3, inEventCount);
-                    Assert.assertEquals(3, inEvents.length);
+                    Assert.assertEquals(inEventCount, 3);
+                    Assert.assertEquals(inEvents.length, 3);
                 }
             }
 
@@ -102,18 +94,18 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST4", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST4");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST4");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void read1EventMatchingAValueFromSolrTable() throws InterruptedException {
+    public void read1EventMatchingAValueFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -144,8 +136,8 @@ public class ReadFromSolrTableTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    Assert.assertEquals(1, inEvents.length);
-                    Assert.assertEquals(new Object[]{"first1", "last2", 45}, inEvents[0].getData());
+                    Assert.assertEquals(inEvents.length, 1);
+                    Assert.assertEquals(inEvents[0].getData(), new Object[]{"first1", "last2", 45});
                 }
             }
         });
@@ -156,18 +148,18 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST5", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST5");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST5");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void readEventsGreaterThanAValueFromSolrTable() throws InterruptedException {
+    public void readEventsGreaterThanAValueFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -197,17 +189,11 @@ public class ReadFromSolrTableTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
+                int inEventCount = 0;
                 if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        if (Arrays.equals(new Object[]{"first1", "last2", 45}, event.getData())) {
-                            inEventCount++;
-                        }
-                        if (Arrays.equals(new Object[]{"first1", "last3", 100}, event.getData())) {
-                            inEventCount++;
-                        }
-                    }
-                    Assert.assertEquals(2, inEventCount);
-                    Assert.assertEquals(2, inEvents.length);
+                    inEventCount = checkReceivedEvents(inEvents, inEventCount);
+                    Assert.assertEquals(inEventCount, 2);
+                    Assert.assertEquals(inEvents.length, 2);
                 }
             }
         });
@@ -218,18 +204,19 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST6", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST6");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST6");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void read1EventGreaterAValueAndMatchingOneValueFromSolrTable() throws InterruptedException {
+    public void read1EventGreaterAValueAndMatchingOneValueFromSolrTable()
+            throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -254,20 +241,8 @@ public class ReadFromSolrTableTestCase {
                            "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
-                                                                                             insertQuery + readQuery);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
-                        inEventCount++;
-                    }
-                    Assert.assertEquals(1, inEventCount);
-                    Assert.assertEquals(1, inEvents.length);
-                }
-            }
-        });
+                insertQuery + readQuery);
+        checkReceivedEvents(siddhiAppRuntime);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
@@ -275,18 +250,35 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST7", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST7");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST7");
             siddhiAppRuntime.shutdown();
         }
     }
 
+    private void checkReceivedEvents(SiddhiAppRuntime siddhiAppRuntime) {
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    int inEventCount = 0;
+                    if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
+                        inEventCount++;
+                    }
+                    Assert.assertEquals(inEventCount, 1);
+                    Assert.assertEquals(inEvents.length, 1);
+                }
+            }
+        });
+    }
+
     @Test
-    public void read1EventMatchingAllFieldsFromSolrTable() throws InterruptedException {
+    public void read1EventMatchingAllFieldsFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -311,17 +303,18 @@ public class ReadFromSolrTableTestCase {
                            "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
-                                                                                             insertQuery + readQuery);
+                insertQuery + readQuery);
         siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
+                int inEventCount = 0;
                 if (inEvents != null) {
                     if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
                         inEventCount++;
                     }
-                    Assert.assertEquals(1, inEventCount);
-                    Assert.assertEquals(1, inEvents.length);
+                    Assert.assertEquals(inEventCount, 1);
+                    Assert.assertEquals(inEvents.length, 1);
                 }
             }
         });
@@ -332,18 +325,18 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST8", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST8");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST8");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void read1EventWithMultipleOperatorsFromSolrTable() throws InterruptedException {
+    public void read1EventWithMultipleOperatorsFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -369,19 +362,7 @@ public class ReadFromSolrTableTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery +
                                                                                              insertQuery + readQuery);
-        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    if (Arrays.equals(new Object[]{"first1", "last2", 45}, inEvents[0].getData())) {
-                        inEventCount++;
-                    }
-                    Assert.assertEquals(1, inEventCount);
-                    Assert.assertEquals(1, inEvents.length);
-                }
-            }
-        });
+        checkReceivedEvents(siddhiAppRuntime);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         InputHandler booStream = siddhiAppRuntime.getInputHandler("BooStream");
         try {
@@ -389,18 +370,18 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST9", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST9");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST9");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void readEventsWithMultipleOperatorsFromSolrTable() throws InterruptedException {
+    public void readEventsWithMultipleOperatorsFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
@@ -431,16 +412,10 @@ public class ReadFromSolrTableTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        if (Arrays.equals(new Object[]{"first1", "last2", 45}, event.getData())) {
-                            inEventCount++;
-                        }
-                        if (Arrays.equals(new Object[]{"first1", "last3", 100}, event.getData())) {
-                            inEventCount++;
-                        }
-                    }
-                    Assert.assertEquals(2, inEventCount);
-                    Assert.assertEquals(2, inEvents.length);
+                    int inEventCount = 0;
+                    inEventCount = checkReceivedEvents(inEvents, inEventCount);
+                    Assert.assertEquals(inEventCount, 2);
+                    Assert.assertEquals(inEvents.length, 2);
 
                 }
             }
@@ -452,25 +427,37 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first1", "last1", 23});
             fooStream.send(new Object[]{"first2", "last2", 45});
             fooStream.send(new Object[]{"first3", "last3", 100});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST10", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST10");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST10");
             siddhiAppRuntime.shutdown();
         }
     }
 
+    private int checkReceivedEvents(Event[] inEvents, int inEventCount) {
+        for (Event event : inEvents) {
+            if (Arrays.equals(new Object[]{"first1", "last2", 45}, event.getData())) {
+                inEventCount++;
+            }
+            if (Arrays.equals(new Object[]{"first1", "last3", 100}, event.getData())) {
+                inEventCount++;
+            }
+        }
+        return inEventCount;
+    }
+
     @Test
-    public void readEventsWithComplexConditionFromSolrTable() throws InterruptedException {
+    public void readEventsWithComplexConditionFromSolrTable() throws InterruptedException, SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         SolrClientServiceImpl indexerService = SolrClientServiceImpl.INSTANCE;
         String defineQuery =
                 "define stream FooStream (firstname string, lastname string, age int, school string, index int);" +
                 "define stream BooStream (firstname string);" +
                 "@PrimaryKey('index')" +
-                "@store(type='solr', url='localhost:9983', collection='TEST10', base.config='gettingstarted', " +
+                "@store(type='solr', url='localhost:9983', collection='TEST11', base.config='gettingstarted', " +
                 "shards='2', replicas='2', schema='firstname string stored, lastname string stored, age int stored, " +
                 "school string stored, index int" +
                 "', " +
@@ -496,6 +483,7 @@ public class ReadFromSolrTableTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 if (inEvents != null) {
+                    int inEventCount = 0;
                     for (Event event : inEvents) {
                         if (Arrays.equals(new Object[]{"first2", "last2", 45, "school2", 1002}, event.getData())) {
                             inEventCount++;
@@ -504,8 +492,8 @@ public class ReadFromSolrTableTestCase {
                             inEventCount++;
                         }
                     }
-                    Assert.assertEquals(2, inEventCount);
-                    Assert.assertEquals(2, inEvents.length);
+                    Assert.assertEquals(inEventCount, 2);
+                    Assert.assertEquals(inEvents.length, 2);
 
                 }
             }
@@ -520,12 +508,12 @@ public class ReadFromSolrTableTestCase {
             fooStream.send(new Object[]{"first4", "last4", 56, "school4", 1004});
             fooStream.send(new Object[]{"first5", "last5", 43, "school5", 1005});
             fooStream.send(new Object[]{"first6", "last6", 56, "school6", 1006});
-            Thread.sleep(1000);
+            SolrTestUtils.waitTillEventsPersist(indexerService, 3, "TEST11", Duration.FIVE_SECONDS);
             booStream.send(new Object[]{"first1"});
-            indexerService.deleteCollection("TEST10");
         } catch (Exception e) {
             //ignored
         } finally {
+            indexerService.deleteCollection("TEST11");
             siddhiAppRuntime.shutdown();
         }
     }

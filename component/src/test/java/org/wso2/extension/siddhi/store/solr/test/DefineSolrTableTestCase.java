@@ -18,6 +18,8 @@
 
 package org.wso2.extension.siddhi.store.solr.test;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchema;
@@ -37,7 +39,7 @@ public class DefineSolrTableTestCase {
     private static SolrClientServiceImpl indexerService;
 
     @Test
-    public void testDefineSolrTable() {
+    public void testDefineSolrTable() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', collection='TEST1', base.config='gettingstarted', " +
@@ -56,10 +58,10 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
-            indexerService.deleteCollection("TEST1");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
+            indexerService.deleteCollection("TEST1");
             siddhiAppRuntime.shutdown();
         }
     }
@@ -90,16 +92,14 @@ public class DefineSolrTableTestCase {
         SiddhiAppRuntime runtime = siddhiManager.createSiddhiAppRuntime(defineQuery);
         runtime.start();
         try {
-            Thread.sleep(60000);
-        } catch (InterruptedException e) {
-            //ignore
+            Awaitility.await().atLeast(Duration.FIVE_SECONDS);
         } finally {
             runtime.shutdown();
         }
     }
 
     @Test
-    public void testDefineSolrTable3() {
+    public void testDefineSolrTable3() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', collection='XXX', base.config='gettingstarted', " +
@@ -118,16 +118,16 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
-            indexerService.deleteCollection("XXX");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
+            indexerService.deleteCollection("XXX");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void testDefineSolrTable4() {
+    public void testDefineSolrTable4() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', collection='YYY', base.config='gettingstarted', " +
@@ -146,16 +146,16 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
-            indexerService.deleteCollection("YYY");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
+            indexerService.deleteCollection("YYY");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void testDefineSolrTable5() {
+    public void testDefineSolrTable5() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', base.config='gettingstarted', " +
@@ -174,16 +174,16 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
-            indexerService.deleteCollection("Footable");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
+            indexerService.deleteCollection("Footable");
             siddhiAppRuntime.shutdown();
         }
     }
 
     @Test
-    public void testDefineSolrTable6() {
+    public void testDefineSolrTable6() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', collection='', base.config='gettingstarted', " +
@@ -202,10 +202,10 @@ public class DefineSolrTableTestCase {
             Assert.assertTrue(field1.getProperty(SolrSchemaField.ATTR_TYPE).equals("long"));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_STORED).equals(true));
             Assert.assertTrue(field2.getProperty(SolrSchemaField.ATTR_TYPE).equals("string"));
-            indexerService.deleteCollection("Footable2");
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
+            indexerService.deleteCollection("Footable2");
             siddhiAppRuntime.shutdown();
         }
     }
