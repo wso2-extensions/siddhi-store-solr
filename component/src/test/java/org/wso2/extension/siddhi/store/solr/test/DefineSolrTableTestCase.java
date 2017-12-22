@@ -61,13 +61,12 @@ public class DefineSolrTableTestCase {
         } catch (SolrClientServiceException | SolrSchemaNotFoundException e) {
             Assert.fail(e.getMessage());
         } finally {
-            indexerService.deleteCollection("TEST1");
             siddhiAppRuntime.shutdown();
         }
     }
 
-    @Test
-    public void testDefineExistingSolrTable() {
+    @Test(dependsOnMethods = "testDefineSolrTable")
+    public void testDefineExistingSolrTable() throws SolrClientServiceException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String defineQuery =
                 "@store(type='solr', collection='TEST1', base.config='gettingstarted', " +
@@ -75,9 +74,13 @@ public class DefineSolrTableTestCase {
                 "define table Footable(time long, date string);";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(defineQuery);
-        siddhiAppRuntime.start();
-        indexerService = SolrClientServiceImpl.INSTANCE;
-        siddhiAppRuntime.shutdown();
+        try {
+            siddhiAppRuntime.start();
+            indexerService = SolrClientServiceImpl.INSTANCE;
+        } finally {
+            indexerService.deleteCollection("TEST1");
+            siddhiAppRuntime.shutdown();
+        }
     }
 
     @Test
