@@ -18,6 +18,7 @@
 
 package org.wso2.extension.siddhi.store.solr.utils;
 
+import io.siddhi.query.api.definition.Attribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrInputDocument;
@@ -28,7 +29,6 @@ import org.wso2.extension.siddhi.store.solr.beans.SiddhiSolrDocumentField;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchema;
 import org.wso2.extension.siddhi.store.solr.beans.SolrSchemaField;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrTableException;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;

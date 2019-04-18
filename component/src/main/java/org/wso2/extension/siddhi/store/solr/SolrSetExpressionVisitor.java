@@ -18,10 +18,10 @@
 
 package org.wso2.extension.siddhi.store.solr;
 
+import io.siddhi.core.table.record.BaseExpressionVisitor;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.condition.Compare;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrConditionVisitorException;
-import org.wso2.siddhi.core.table.record.BaseExpressionVisitor;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 /**
  * This class represents the Condition vistor implementation specific to Solr record tables.

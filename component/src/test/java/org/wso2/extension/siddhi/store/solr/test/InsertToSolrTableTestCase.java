@@ -18,12 +18,12 @@
 
 package org.wso2.extension.siddhi.store.solr.test;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.stream.input.InputHandler;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceException;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 
 /**
  * This test class contains the test cases related to inserting the events to solr event table

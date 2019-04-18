@@ -18,6 +18,8 @@
 
 package org.wso2.extension.siddhi.store.solr;
 
+import io.siddhi.core.table.record.RecordIterator;
+import io.siddhi.query.api.definition.Attribute;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
@@ -28,8 +30,6 @@ import org.wso2.extension.siddhi.store.solr.exceptions.SolrClientServiceExceptio
 import org.wso2.extension.siddhi.store.solr.exceptions.SolrIteratorException;
 import org.wso2.extension.siddhi.store.solr.impl.SiddhiSolrClient;
 import org.wso2.extension.siddhi.store.solr.impl.SolrClientServiceImpl;
-import org.wso2.siddhi.core.table.record.RecordIterator;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.IOException;
 import java.util.ArrayList;

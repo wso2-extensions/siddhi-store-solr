@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.store.solr;
 
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 /**
  * This class represents the compiled condition specific to Solr record tables.
@@ -28,11 +28,6 @@ public class SolrCompiledCondition implements CompiledCondition {
 
     public SolrCompiledCondition(String compiledQuery) {
         this.compiledQuery = compiledQuery;
-    }
-
-    @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return null;
     }
 
     public String getCompiledQuery() {
