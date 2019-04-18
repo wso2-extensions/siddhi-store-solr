@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.store.solr.exceptions;
 
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * This class represents the exception class thrown from the

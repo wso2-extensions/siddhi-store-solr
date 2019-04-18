@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.store.solr.exceptions;
 
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 
 /**
  * This class represents any exception occurring at {@link org.wso2.extension.siddhi.store.solr.SolrTable} level
